@@ -1,0 +1,370 @@
+@import "tailwindcss";
+
+:root {
+  --font-rasa: Georgia, "Times New Roman", serif;
+  --font-montserrat-alternates: "Trebuchet MS", Arial, sans-serif;
+  --font-dosis: "Arial Narrow", "Trebuchet MS", Arial, sans-serif;
+  --bg-primary: #0c0c0e;
+  --bg-surface: #17171a;
+  --bg-surface-elevated: #222226;
+  --bg-surface-hover: #2a2a30;
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --border-flame: rgba(249, 115, 22, 0.3);
+  
+  --color-flame: #f97316;
+  --color-flame-hover: #ea580c;
+  --color-gold: #f59e0b;
+  
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+}
+
+@theme inline {
+  --font-serif: var(--font-rasa), Georgia, serif;
+  --font-sans: var(--font-montserrat-alternates), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-dosis: var(--font-dosis), sans-serif;
+  --font-display: var(--font-dosis), sans-serif;
+  
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface-elevated: var(--bg-surface-elevated);
+  --color-bg-surface-hover: var(--bg-surface-hover);
+  
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-border-flame: var(--border-flame);
+  
+  --color-flame: var(--color-flame);
+  --color-flame-hover: var(--color-flame-hover);
+  --color-gold: var(--color-gold);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+}
+
+/* Base resets & styling */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-montserrat-alternates), sans-serif;
+  overflow-x: hidden;
+}
+
+::selection { background: #b65520; color: #fff8ed; }
+:focus-visible { scroll-margin: 6rem; }
+html { scrollbar-color: #9d4c22 #17100c; scroll-padding-top: 5rem; }
+
+@supports (padding: env(safe-area-inset-top)) {
+  body { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+}
+
+.menu-surface {
+  background-color: #ead9bd;
+  background-image: linear-gradient(110deg, rgba(255,255,255,.3), transparent 45%), url("/bravos-fondo-parrilla-cocina.jpg");
+  background-size: auto, cover;
+  background-position: center;
+  background-blend-mode: soft-light;
+}
+
+.bravos-link { display: inline-flex; min-height: 44px; align-items: center; gap: .5rem; border-bottom: 1px solid rgba(93,51,25,.45); color: #5c3018; font-weight: 700; }
+
+.bravos-carousel-section {
+  background:
+    radial-gradient(circle at 14% 28%, rgba(168, 77, 27, .19), transparent 30%),
+    linear-gradient(135deg, #17100c 0%, #0e0a08 48%, #1b100a 100%);
+}
+
+.bravos-carousel-line {
+  position: absolute;
+  left: -8%;
+  width: 116%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(198, 126, 67, .55), rgba(198, 126, 67, .12), transparent);
+  transform: rotate(-1.2deg);
+}
+
+.bravos-carousel-line--top { top: 31%; }
+.bravos-carousel-line--bottom { bottom: 16%; transform: rotate(.8deg); }
+
+.bravos-carousel-cta {
+  display: inline-flex;
+  min-height: 44px;
+  width: fit-content;
+  align-items: center;
+  gap: .6rem;
+  border-bottom: 1px solid rgba(226, 153, 91, .5);
+  color: #e8c29c;
+  font-size: .875rem;
+  font-weight: 700;
+  transition: color .2s ease, border-color .2s ease;
+}
+
+.bravos-carousel-cta:hover { color: #fff5e9; border-color: #e2995b; }
+.bravos-marquee-shell { margin-inline: -1rem; overflow: hidden; touch-action: pan-y; }
+.bravos-marquee-track { display: flex; width: max-content; cursor: grab; will-change: transform; }
+.bravos-marquee-shell.is-dragging .bravos-marquee-track { cursor: grabbing; }
+.bravos-product-run { display: flex; flex-shrink: 0; gap: 1rem; padding-right: 1rem; }
+
+.bravos-carousel-card {
+  position: relative;
+  flex: none;
+  width: min(78vw, 21rem);
+  height: 24rem;
+  overflow: hidden;
+  border: 1px solid rgba(207, 139, 80, .22);
+  border-radius: 1.25rem;
+  background: #17100c;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, .3);
+}
+
+@keyframes bravos-marquee {
+  to { transform: translateX(-50%); }
+}
+
+@media (hover: hover) {
+  .bravos-marquee-shell:hover .bravos-marquee-track { animation-play-state: paused; }
+}
+
+.menu-page-hero {
+  background:
+    linear-gradient(90deg, rgba(9, 6, 4, .95), rgba(18, 10, 6, .72)),
+    radial-gradient(circle at 75% 30%, rgba(182, 85, 31, .25), transparent 36%);
+  border-bottom: 1px solid rgba(193, 122, 64, .2);
+}
+
+.menu-page-surface {
+  background:
+    linear-gradient(110deg, rgba(255, 255, 255, .32), transparent 42%),
+    #ead9bd;
+}
+
+.menu-catalog-card > div:first-child { height: 17rem; border-radius: 1.1rem; box-shadow: 0 20px 45px rgba(67, 33, 13, .16); }
+.menu-catalog-card--portrait > div:first-child { height: 29rem; }
+
+.menu-page-order-cta {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: .65rem;
+  border-radius: 999px;
+  background: #a84c1d;
+  padding: .75rem 1.5rem;
+  font-family: var(--font-dosis), sans-serif;
+  font-weight: 700;
+  color: white;
+  transition: background-color .2s ease, transform .2s ease;
+}
+
+.menu-page-order-cta:hover { background: #833816; transform: translateY(-1px); }
+
+@media (max-width: 767px) {
+  .bravos-carousel-section { padding-top: clamp(4rem, 13vw, 6rem); padding-bottom: clamp(4rem, 13vw, 6rem); }
+  .bravos-carousel-card { width: min(82vw, 21rem); }
+  .menu-page-hero { padding-top: 7rem; padding-bottom: 3.5rem; }
+  .menu-page-surface { overflow: clip; }
+}
+
+.footer-icon-link {
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(205, 141, 82, .28);
+  border-radius: .75rem;
+  color: #e6c4a3;
+  transition: border-color .2s ease, color .2s ease, background-color .2s ease;
+}
+
+.cart-launcher { bottom: max(1rem, env(safe-area-inset-bottom)); }
+.cart-drawer-panel { padding-bottom: env(safe-area-inset-bottom); }
+
+a.footer-icon-link:hover { border-color: rgba(221, 151, 88, .7); background: rgba(171, 81, 29, .14); color: #fff1df; }
+a.footer-icon-link:focus-visible { outline: 2px solid #d68a48; outline-offset: 3px; }
+
+.cooking-scroll-section {
+  position: relative;
+  height: 320svh;
+  background: #0a0705;
+}
+
+.cooking-sticky-scene {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 34rem;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.cooking-scene-image {
+  object-fit: cover;
+  object-position: center center;
+}
+
+.cooking-scene-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(7, 4, 3, .72) 0%, rgba(7, 4, 3, .14) 31%, transparent 56%),
+    linear-gradient(180deg, rgba(5, 3, 2, .3) 0%, transparent 32%, rgba(5, 3, 2, .08) 70%, rgba(5, 3, 2, .38) 100%);
+}
+
+.cooking-thermometer {
+  position: absolute;
+  top: 50%;
+  right: clamp(1.5rem, 5vw, 5.5rem);
+  z-index: 10;
+  display: flex;
+  width: 6.5rem;
+  transform: translateY(-50%);
+  flex-direction: column;
+  align-items: center;
+  color: #fff1df;
+  filter: drop-shadow(0 5px 18px rgba(0, 0, 0, .68));
+}
+
+.cooking-temperature {
+  margin-bottom: 1rem;
+  font-family: var(--font-dosis), sans-serif;
+  font-size: 2.45rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.cooking-thermometer-body {
+  position: relative;
+  width: .72rem;
+  height: 14rem;
+  overflow: visible;
+  border: 1px solid rgba(255, 237, 215, .72);
+  border-bottom: 0;
+  border-radius: .5rem .5rem 0 0;
+  background: rgba(17, 10, 6, .38);
+}
+
+.cooking-thermometer-fill {
+  position: absolute;
+  inset: .18rem .18rem 0;
+  transform-origin: center bottom;
+  border-radius: .25rem .25rem 0 0;
+  background: linear-gradient(180deg, #ffc26f, #e86822 58%, #b93f16);
+  box-shadow: 0 0 13px rgba(236, 104, 35, .36);
+}
+
+.cooking-thermometer-bulb {
+  width: 1.55rem;
+  height: 1.55rem;
+  margin-top: -.16rem;
+  border: 1px solid rgba(255, 237, 215, .75);
+  border-radius: 50%;
+  background: #d6501c;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, .38), inset 0 0 0 .25rem rgba(255, 188, 102, .2);
+}
+
+.cooking-thermometer-mark {
+  position: absolute;
+  left: 1rem;
+  width: .65rem;
+  height: 1px;
+  background: rgba(255, 237, 215, .58);
+}
+
+.cooking-thermometer-mark--one { bottom: 25%; }
+.cooking-thermometer-mark--two { bottom: 50%; }
+.cooking-thermometer-mark--three { bottom: 75%; }
+
+.builder-video { object-position: center center; }
+.builder-burger { left: 29%; right: 8%; }
+.builder-burger--gordita { top: 8%; bottom: -13%; }
+.builder-burger--leon { top: 1%; bottom: -6%; }
+.builder-fries { left: 17%; bottom: 2%; width: 48%; height: 48%; }
+.builder-drink { right: -1%; bottom: 16%; width: 48%; height: 72%; }
+.builder-drink img { transform: scale(1.85); }
+.builder-fries img { transform: scale(1.12); }
+
+@media (max-width: 1023px) {
+  .cooking-scroll-section { height: 290svh; }
+  .cooking-thermometer { right: 2rem; }
+  .bravos-carousel-card { width: min(72vw, 19rem); height: 22rem; }
+  .builder-video { object-position: center center; }
+  .builder-burger { left: 27%; right: 5%; }
+  .builder-burger--gordita { top: 8%; bottom: -14%; }
+  .builder-burger--leon { top: 1%; bottom: -7%; }
+  .builder-fries { left: 12%; bottom: 2%; width: 50%; height: 46%; }
+  .builder-drink { right: -2%; bottom: 14%; width: 52%; height: 70%; }
+}
+
+@media (max-width: 639px) {
+  .cooking-scroll-section { height: 250svh; }
+  .cooking-sticky-scene { min-height: 30rem; }
+  .cooking-scene-image { object-fit: contain; object-position: center center; }
+  .cooking-scene-shade {
+    background:
+      linear-gradient(180deg, rgba(5, 3, 2, .76) 0%, rgba(5, 3, 2, .1) 28%, transparent 68%, rgba(5, 3, 2, .5) 100%);
+  }
+  .cooking-thermometer { top: 48%; right: .45rem; width: 4.7rem; }
+  .cooking-temperature { margin-bottom: .7rem; font-size: 1.8rem; }
+  .cooking-thermometer-body { width: .58rem; height: 10rem; }
+  .cooking-thermometer-bulb { width: 1.25rem; height: 1.25rem; }
+  .cooking-thermometer-mark { left: .82rem; width: .45rem; }
+  .bravos-marquee-shell { margin-inline: -1rem; padding-inline: .25rem; }
+  .bravos-carousel-card { width: 78vw; height: 21rem; }
+  .menu-catalog-card > div:first-child { height: 14rem; }
+  .menu-catalog-card--portrait > div:first-child { height: 25rem; }
+  .builder-video { object-position: center center; }
+  .builder-burger { left: 18%; right: 5%; }
+  .builder-burger--gordita { top: 7%; bottom: -11%; }
+  .builder-burger--leon { top: 0; bottom: -4%; }
+  .builder-fries { left: 7%; bottom: 0; width: 56%; height: 44%; }
+  .builder-drink { right: -4%; bottom: 10%; width: 58%; height: 68%; }
+}
+
+@media (max-width: 380px) {
+  .cooking-thermometer { right: .15rem; width: 4rem; }
+  .cooking-temperature { font-size: 1.55rem; }
+  .cooking-thermometer-body { height: 8.5rem; }
+  .builder-product-stage { min-height: 18rem; }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .cooking-sticky-scene { min-height: 26rem; }
+  .cooking-thermometer { transform: translateY(-45%) scale(.82); transform-origin: center; }
+}
+
+@media (pointer: coarse) {
+  button, a, summary, input, textarea, select { touch-action: manipulation; }
+}
+
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .builder-video { display: none; }
+  .cooking-scroll-section--reduced { height: auto; }
+  .cooking-scroll-section--reduced .cooking-sticky-scene { position: relative; min-height: min(100svh, 52rem); }
+  .bravos-marquee-shell { overflow-x: auto; scrollbar-width: thin; }
+  .bravos-marquee-track { animation: none !important; }
+  .bravos-product-run--duplicate { display: none; }
+  #armar-orden { background-image: linear-gradient(90deg, rgba(18,11,7,.1), rgba(18,11,7,.78)), url("/bravos-fondo-parrilla-cocina.jpg"); background-size: cover; background-position: center; }
+}
