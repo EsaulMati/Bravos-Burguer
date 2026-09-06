@@ -10,13 +10,13 @@ function ProductRun({ duplicate = false }: { duplicate?: boolean }) {
   return (
     <div className={`bravos-product-run ${duplicate ? "bravos-product-run--duplicate" : ""}`} aria-hidden={duplicate || undefined}>
       {MENU_PRODUCTS.map((item) => (
-        <article key={`${duplicate ? "copy-" : ""}${item.id}`} className={`group bravos-carousel-card bravos-carousel-card--${item.orientation}`}>
+        <Link href="/menu" aria-label={duplicate ? undefined : `Ver ${item.name} en el menú`} tabIndex={duplicate ? -1 : undefined} key={`${duplicate ? "copy-" : ""}${item.id}`} className={`group bravos-carousel-card bravos-carousel-card--${item.orientation}`}>
           <div className="relative h-full overflow-hidden rounded-[inherit]">
             <Image src={item.image} alt={duplicate ? "" : item.name} fill sizes="(max-width: 639px) 78vw, (max-width: 1023px) 42vw, 24vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025]" />
             <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6"><h3 className="font-serif text-xl font-bold leading-tight text-white sm:text-2xl">{item.name}</h3></div>
+            <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-6"><h3 className="font-serif text-base font-bold leading-tight text-white sm:text-2xl">{item.name}</h3></div>
           </div>
-        </article>
+        </Link>
       ))}
     </div>
   );
@@ -31,6 +31,7 @@ export function FeaturedMenu() {
   const idleTimerRef = useRef<number | null>(null);
   const pausedUntilRef = useRef(0);
   const dragRef = useRef<{ pointerId: number; startX: number; startOffset: number } | null>(null);
+  const didDragRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const applyOffset = useCallback((nextOffset: number) => {
@@ -55,9 +56,13 @@ export function FeaturedMenu() {
     if (!track) return;
     const measure = () => { halfWidthRef.current = track.scrollWidth / 2; applyOffset(offsetRef.current); };
     measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(track);
-    return () => observer.disconnect();
+    if (typeof window.ResizeObserver === "function") {
+      const observer = new ResizeObserver(measure);
+      observer.observe(track);
+      return () => observer.disconnect();
+    }
+    window.addEventListener("resize", measure, { passive: true });
+    return () => window.removeEventListener("resize", measure);
   }, [applyOffset]);
 
   useEffect(() => {
@@ -77,6 +82,7 @@ export function FeaturedMenu() {
 
   const pauseThenResume = useCallback(() => {
     clearIdleTimer();
+    didDragRef.current = false;
     pausedUntilRef.current = performance.now() + 1200;
     idleTimerRef.current = window.setTimeout(() => { idleTimerRef.current = null; pausedUntilRef.current = 0; }, 1200);
   }, [clearIdleTimer]);
@@ -86,12 +92,13 @@ export function FeaturedMenu() {
     clearIdleTimer();
     dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startOffset: offsetRef.current };
     setIsDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
+    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* El drag continúa sin capture en navegadores antiguos. */ }
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
+    if (Math.abs(event.clientX - drag.startX) > 6) didDragRef.current = true;
     applyOffset(drag.startOffset + event.clientX - drag.startX);
   };
 
@@ -100,7 +107,7 @@ export function FeaturedMenu() {
     if (!drag || drag.pointerId !== event.pointerId) return;
     dragRef.current = null;
     setIsDragging(false);
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch { /* Sin soporte de pointer capture. */ }
     pauseThenResume();
   };
 
@@ -117,9 +124,9 @@ export function FeaturedMenu() {
       <div className="bravos-carousel-line bravos-carousel-line--top" aria-hidden="true" />
       <div className="bravos-carousel-line bravos-carousel-line--bottom" aria-hidden="true" />
       <div className="relative z-10 mx-auto max-w-7xl">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><p className="font-dosis text-xs font-bold uppercase tracking-[0.32em] text-[#c7864d]">Fuego, humo y carÃ¡cter</p><h2 id="products-title" className="mt-3 max-w-3xl font-serif text-4xl font-bold leading-none text-[#f5eadc] sm:text-6xl">Lo que manda en Bravos</h2></div><Link href="/menu" className="bravos-carousel-cta">Ver menÃº completo <span aria-hidden="true">â†’</span></Link></div>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><p className="font-dosis text-[.66rem] font-bold uppercase tracking-[0.3em] text-[#c7864d] sm:text-xs">FUEGO, HUMO Y CARÁCTER</p><h2 id="products-title" className="mt-3 max-w-3xl font-serif text-[2.25rem] font-bold leading-none text-[#f5eadc] sm:text-6xl">Lo que manda en Bravos</h2></div><Link href="/menu" className="bravos-carousel-cta">Ver menú completo <span aria-hidden="true">→</span></Link></div>
       </div>
-      <div className={`bravos-marquee-shell relative z-10 mt-10 sm:mt-12 ${isDragging ? "is-dragging" : ""}`} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onWheel={handleWheel}>
+      <div className={`bravos-marquee-shell relative z-10 mt-10 sm:mt-12 ${isDragging ? "is-dragging" : ""}`} onClickCapture={(event) => { if (didDragRef.current) { event.preventDefault(); didDragRef.current = false; } }} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onWheel={handleWheel}>
         <div ref={trackRef} className="bravos-marquee-track"><ProductRun /><ProductRun duplicate /></div>
       </div>
     </section>

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BRAVOS_LOCATION_URL } from "@/src/data/contact";
 
 const INSTAGRAM_URL =
   "https://www.instagram.com/bravosgrillsmoke?igsi=N2t0Zm5zNXNpYmpk";
@@ -27,26 +26,6 @@ export function FooterSimple() {
           </div>
 
           <div className="flex items-center gap-3" aria-label="Enlaces de Bravos">
-            {BRAVOS_LOCATION_URL ? (
-              <a
-                href={BRAVOS_LOCATION_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Ubicación de Bravos"
-                className="footer-icon-link"
-              >
-                <LocationIcon />
-              </a>
-            ) : (
-              <span
-                role="img"
-                aria-label="Ubicación de Bravos pendiente de configurar"
-                className="footer-icon-link cursor-not-allowed opacity-45"
-                title="Enlace de ubicación pendiente"
-              >
-                <LocationIcon />
-              </span>
-            )}
             <a
               href={INSTAGRAM_URL}
               target="_blank"
@@ -68,15 +47,6 @@ export function FooterSimple() {
         </div>
       </div>
     </footer>
-  );
-}
-
-function LocationIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.7">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
-      <circle cx="12" cy="10" r="2.4" />
-    </svg>
   );
 }
 

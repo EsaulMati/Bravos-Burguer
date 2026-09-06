@@ -7,8 +7,10 @@ import {
   calculateCartItemSubtotal,
   calculateCartTotal,
   CART_QUANTITY_LIMIT,
+  formatSauceSelection,
   isCatalogCartItem,
   getCartItemImage,
+  getCartItemCount,
 } from "@/src/lib/cart";
 import type { CartItem } from "@/src/types/landing";
 import { QuantityControl } from "../order-builder/QuantityControl";
@@ -36,6 +38,7 @@ export function CartDrawer({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
   const cartTotal = calculateCartTotal(items);
+  const itemCount = getCartItemCount(items);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -58,7 +61,7 @@ export function CartDrawer({
         )
       );
       const firstElement = focusableElements[0];
-      const lastElement = focusableElements.at(-1);
+      const lastElement = focusableElements[focusableElements.length - 1];
 
       if (event.shiftKey && document.activeElement === firstElement) {
         event.preventDefault();
@@ -90,13 +93,13 @@ export function CartDrawer({
         ref={openButtonRef}
         type="button"
         onClick={onOpen}
-        aria-label={`Abrir carrito, ${items.length} ${items.length === 1 ? "orden" : "órdenes"}`}
+        aria-label={`Abrir carrito, ${itemCount} ${itemCount === 1 ? "producto" : "productos"}`}
         className="cart-launcher fixed bottom-4 right-3 z-40 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#21150f]/95 px-3.5 py-2 font-dosis font-bold text-white shadow-[0_12px_32px_rgba(0,0,0,.35)] backdrop-blur-md transition-colors hover:bg-[#342016] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7813d] sm:bottom-6 sm:right-6"
       >
         <CartIcon />
         <span>Carrito</span>
         <span className="inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#f97316] px-1.5 text-xs text-white">
-          {items.length}
+          {itemCount}
         </span>
       </button>
 
@@ -118,7 +121,7 @@ export function CartDrawer({
             <header className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3 sm:px-5">
               <div>
                 <p className="font-dosis text-xs font-bold uppercase tracking-[0.14em] text-[#f59e0b]">
-                  {items.length} {items.length === 1 ? "orden" : "órdenes"}
+                  {itemCount} {itemCount === 1 ? "producto" : "productos"}
                 </p>
                 <h2 id="cart-title" className="font-serif text-2xl font-bold text-white">
                   Tu carrito Bravos
@@ -214,6 +217,8 @@ function CartLine({ item, index, onUpdate, onRemove }: CartLineProps) {
               Producto {index + 1}
             </p>
             <h3 className="mt-0.5 font-serif text-lg font-bold text-white">{item.name}</h3>
+            {item.sauce && <p className="mt-1 text-xs text-[#d9b48e]">Salsas: {formatSauceSelection(item.sauce)}</p>}
+            {item.drink && <p className="text-xs text-[#d9b48e]">Gaseosa: {item.drink}</p>}
           </div>
           </div><button
             type="button"
@@ -255,6 +260,8 @@ function CartLine({ item, index, onUpdate, onRemove }: CartLineProps) {
             Orden {index + 1}
           </p>
           <h3 className="mt-0.5 font-serif text-lg font-bold text-white">{burger.name}</h3>
+          {item.friesEnabled && item.sauce && <p className="mt-1 text-xs text-[#d9b48e]">Salsas: {formatSauceSelection(item.sauce)}</p>}
+          {item.drinkEnabled && item.drink && <p className="text-xs text-[#d9b48e]">Gaseosa: {item.drink}</p>}
         </div><button
           type="button"
           onClick={onRemove}

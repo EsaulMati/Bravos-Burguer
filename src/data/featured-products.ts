@@ -15,7 +15,22 @@ export const BURGERS_DATA: ProductItem[] = [
 
 export const ADDONS_DATA: ComboAddon[] = [
   { id: "fries", name: "Papas", description: "Porción de papas crocantes.", price: 2, cutoutImage: "/bravos-papas-porcion.png" },
-  { id: "drink", name: "Cola", description: "Gaseosa helada con hielo.", price: 5, cutoutImage: "/bravos-gaseosa-cola.png" },
+  { id: "drink", name: "Gaseosa", description: "Gaseosa helada con hielo.", price: 5, cutoutImage: "/bravos-gaseosa-cola.png" },
+];
+
+export interface AdditionalProduct {
+  id: string;
+  name: string;
+  price: number | null;
+  image: string;
+}
+
+export const ADDITIONAL_PRODUCTS: AdditionalProduct[] = [
+  { id: "extra-papas", name: "Porción de Papas", price: 5, image: "/bravos-papas-porcion.png" },
+  { id: "extra-ranchera", name: "Salsa Ranchera", price: 3, image: "/bravos-salsa-ranchera.png.png" },
+  { id: "extra-tartara", name: "Salsa Tártara", price: 3, image: "/bravos-salsa-tartara.png.png" },
+  { id: "extra-coca-cola", name: "Coca-Cola", price: 5, image: "/bravos-gaseosa-cola.png" },
+  { id: "extra-inca-kola", name: "Inca Kola", price: 5, image: "/bravos-gaseosa-vaso.png" },
 ];
 
 export const ORDER_PRICE_MATRIX: Record<string, { solo: number; fries: number; drink: number; full: number }> = {
@@ -46,6 +61,8 @@ export interface MenuCatalogItem {
   price: number;
   image: string;
   orientation: "portrait" | "landscape";
+  includesFries?: boolean;
+  includesDrink?: boolean;
 }
 
 export interface MenuCatalogSection {
@@ -59,20 +76,20 @@ export const MENU_SECTIONS: MenuCatalogSection[] = [
     { id: "leon", name: "El León", price: 25, image: "/bravos-el-leon-menu.webp", orientation: "portrait" },
   ] },
   { title: "Con su Yapa", items: [
-    { id: "gordita-papas", name: "La Gordita con Papas", price: 22, image: "/bravos-la-gordita-con-papas-menu.webp", orientation: "landscape" },
-    { id: "leon-papas", name: "El León con Papas", price: 27, image: "/bravos-el-leon-con-papas-menu.webp", orientation: "landscape" },
+    { id: "gordita-papas", name: "La Gordita con Papas", price: 22, image: "/bravos-la-gordita-con-papas-menu.webp", orientation: "landscape", includesFries: true },
+    { id: "leon-papas", name: "El León con Papas", price: 27, image: "/bravos-el-leon-con-papas-menu.webp", orientation: "landscape", includesFries: true },
   ] },
   { title: "Pa Bajarlo", items: [
-    { id: "gordita-gaseosa", name: "La Gordita con Gaseosa", price: 25, image: "/bravos-la-gordita-con-gaseosa-menu.webp", orientation: "landscape" },
-    { id: "leon-gaseosa", name: "El León con Gaseosa", price: 30, image: "/bravos-el-leon-con-gaseosa-menu.webp", orientation: "landscape" },
+    { id: "gordita-gaseosa", name: "La Gordita con Gaseosa", price: 25, image: "/bravos-la-gordita-con-gaseosa-menu.webp", orientation: "landscape", includesDrink: true },
+    { id: "leon-gaseosa", name: "El León con Gaseosa", price: 30, image: "/bravos-el-leon-con-gaseosa-menu.webp", orientation: "landscape", includesDrink: true },
   ] },
   { title: "Con Todo", items: [
-    { id: "gordita-full", name: "La Gordita Full", price: 27, image: "/bravos-la-gordita-full-menu.webp", orientation: "landscape" },
-    { id: "leon-full", name: "El León Full", price: 32, image: "/bravos-el-leon-full-menu.webp", orientation: "landscape" },
+    { id: "gordita-full", name: "La Gordita Full", price: 27, image: "/bravos-la-gordita-full-menu.webp", orientation: "landscape", includesFries: true, includesDrink: true },
+    { id: "leon-full", name: "El León Full", price: 32, image: "/bravos-el-leon-full-menu.webp", orientation: "landscape", includesFries: true, includesDrink: true },
   ] },
   { title: "Para la Manchita", items: [
-    { id: "ya-pagaron-x3", name: "Ya Pagaron x3", price: 63, image: "/bravos-ya-pagaron-x3-menu.webp", orientation: "landscape" },
-    { id: "ya-pagaron-x4", name: "Ya Pagaron x4", price: 82, image: "/bravos-ya-pagaron-x4-menu.webp", orientation: "landscape" },
+    { id: "ya-pagaron-x3", name: "Ya Pagaron x3", price: 63, image: "/bravos-ya-pagaron-x3-menu.webp", orientation: "landscape", includesFries: true },
+    { id: "ya-pagaron-x4", name: "Ya Pagaron x4", price: 82, image: "/bravos-ya-pagaron-x4-menu.webp", orientation: "landscape", includesFries: true },
   ] },
   { title: "Pa Picar", items: [
     { id: "empanada-argentina", name: "Empanada Argentina", price: 7.5, image: "/bravos-empanada-carne-menu.webp", orientation: "portrait" },

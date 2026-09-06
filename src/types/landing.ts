@@ -35,11 +35,21 @@ export interface OrderDraft {
   friesQuantity: number;
   drinkEnabled: boolean;
   drinkQuantity: number;
+  sauce: SauceSelection;
+  drink: DrinkSelection;
   notes: string;
 }
 
+export type SauceName = "Ranchera" | "Tártara";
+export type SauceSelection = SauceName[] | "Ninguna" | null;
+export type DrinkSelection = "Coca-Cola" | "Inca Kola" | null;
+
 export interface BuilderCartItem extends OrderDraft {
   id: string;
+  /** Snapshot de precios vigente cuando se agregó la orden. */
+  unitPrice: number;
+  friesUnitPrice: number;
+  drinkUnitPrice: number;
 }
 
 export interface CatalogCartItem {
@@ -49,6 +59,8 @@ export interface CatalogCartItem {
   name: string;
   unitPrice: number;
   quantity: number;
+  sauce: SauceSelection;
+  drink: DrinkSelection;
 }
 
 export type CartItem = BuilderCartItem | CatalogCartItem;

@@ -9,13 +9,20 @@ import {
   useScroll,
   useTransform,
 } from "motion/react";
+import { useMobileViewport } from "@/src/hooks/useMobileViewport";
+import { MobileCookingExperience } from "./MobileCookingExperience";
 
 const RAW_IMAGE = "/bravos-fondo-parrilla-cocina-cruda.webp";
 const COOKED_IMAGE = "/bravos-fondo-parrilla-cocina-cocida.webp";
 const INITIAL_TEMPERATURE = 25;
-const FINAL_TEMPERATURE = 72;
+const FINAL_TEMPERATURE = 160;
 
 export function CookingExperience() {
+  const isMobile = useMobileViewport();
+  return isMobile ? <MobileCookingExperience /> : <DesktopCookingExperience />;
+}
+
+function DesktopCookingExperience() {
   const sectionRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
   const [temperature, setTemperature] = useState(
@@ -28,16 +35,16 @@ export function CookingExperience() {
 
   const rawOpacity = useTransform(scrollYProgress, [0, 0.6, 0.85, 1], [1, 1, 0, 0]);
   const cookedOpacity = useTransform(scrollYProgress, [0, 0.6, 0.85, 1], [0, 0, 1, 1]);
-  const temperatureValue = useTransform(
-    scrollYProgress,
-    [0, 0.85],
-    [INITIAL_TEMPERATURE, FINAL_TEMPERATURE]
-  );
-  const thermometerFill = useTransform(scrollYProgress, [0, 0.85], [0.08, 1]);
+  const thermometerFill = useTransform(scrollYProgress, [0, 1], [0.08, 1]);
   const finalCopyOpacity = useTransform(scrollYProgress, [0.7, 0.8, 1], [0, 1, 1]);
 
-  useMotionValueEvent(temperatureValue, "change", (latest) => {
-    if (!reduceMotion) setTemperature(Math.round(latest));
+  useMotionValueEvent(scrollYProgress, "change", (progress) => {
+    if (!reduceMotion) {
+      const next = progress >= 0.999
+        ? FINAL_TEMPERATURE
+        : Math.min(FINAL_TEMPERATURE - 1, Math.round(INITIAL_TEMPERATURE + 134 * progress));
+      setTemperature(next);
+    }
   });
 
   const displayedTemperature = reduceMotion ? FINAL_TEMPERATURE : temperature;

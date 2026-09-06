@@ -1,5 +1,5 @@
-import { ADDONS_DATA, BURGERS_DATA } from "@/src/data/featured-products";
-import { calculateCartItemSubtotal, calculateCartTotal, isCatalogCartItem } from "@/src/lib/cart";
+import { BURGERS_DATA } from "@/src/data/featured-products";
+import { calculateCartItemSubtotal, calculateCartTotal, formatSauceSelection, isAdditionalCartItem, isCatalogCartItem } from "@/src/lib/cart";
 import { normalizePeruvianPhone } from "@/src/lib/checkout";
 import type { Cart, CheckoutDraft, PaymentMethod } from "@/src/types/landing";
 
@@ -9,8 +9,6 @@ const PAYMENT_LABELS: Record<PaymentMethod, string> = {
 };
 
 export function buildOrderMessage(cart: Cart, checkout: CheckoutDraft): string {
-  const friesAddon = ADDONS_DATA.find((addon) => addon.id === "fries");
-  const drinkAddon = ADDONS_DATA.find((addon) => addon.id === "drink");
   const cartSubtotal = calculateCartTotal(cart.items);
   const lines: string[] = [
     "🔥 BRAVOS BURGER",
@@ -23,13 +21,12 @@ export function buildOrderMessage(cart: Cart, checkout: CheckoutDraft): string {
     "Pedido",
   ];
 
-  cart.items.forEach((item, index) => {
+  cart.items.filter((item) => !isAdditionalCartItem(item)).forEach((item, index) => {
     if (isCatalogCartItem(item)) {
-      lines.push(
-        "",
-        `${index + 1}. ${item.quantity} × ${item.name}`,
-        `   • Subtotal: ${formatCurrency(calculateCartItemSubtotal(item))}`
-      );
+      lines.push("", `${index + 1}. ${item.quantity} × ${item.name}`);
+      if (item.sauce) lines.push(`   • Salsas: ${formatSauceSelection(item.sauce)}`);
+      if (item.drink) lines.push(`   • Gaseosa: ${item.drink}`);
+      lines.push(`   • Subtotal: ${formatCurrency(calculateCartItemSubtotal(item))}`);
       return;
     }
 
@@ -37,19 +34,22 @@ export function buildOrderMessage(cart: Cart, checkout: CheckoutDraft): string {
     if (!burger) return;
     const subtotal = calculateCartItemSubtotal(item);
 
-    lines.push(
-      "",
-      `${index + 1}. ${item.burgerQuantity} × ${burger.name}`,
-      item.friesEnabled && friesAddon
-        ? `   • ${item.friesQuantity} × ${friesAddon.name}`
-        : "   • Sin papas",
-      item.drinkEnabled && drinkAddon
-        ? `   • ${item.drinkQuantity} × ${drinkAddon.name}`
-        : "   • Sin bebida"
-    );
+    lines.push("", `${index + 1}. ${item.burgerQuantity} × ${burger.name}`);
+    lines.push(item.friesEnabled ? `   • Papas: Sí (${item.friesQuantity})` : "   • Papas: No");
+    if (item.friesEnabled && item.sauce) lines.push(`   • Salsas: ${formatSauceSelection(item.sauce)}`);
+    if (item.drinkEnabled && item.drink) lines.push(`   • Gaseosa: ${item.drink} (${item.drinkQuantity})`);
     if (item.notes.trim()) lines.push(`   • Indicaciones: ${item.notes.trim()}`);
     lines.push(`   • Subtotal: ${formatCurrency(subtotal)}`);
   });
+
+  const additionalItems = cart.items.filter(isAdditionalCartItem);
+  if (additionalItems.length > 0) {
+    lines.push("", "ADICIONALES");
+    additionalItems.forEach((item) => {
+      lines.push("", `${item.name} x${item.quantity}`);
+      lines.push(`   • Subtotal: ${formatCurrency(calculateCartItemSubtotal(item))}`);
+    });
+  }
 
   lines.push("", "Pago", `Método: ${paymentLabel(checkout.paymentMethod)}`);
 
