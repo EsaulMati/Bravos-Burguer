@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ADDONS_DATA, BURGERS_DATA } from "@/src/data/featured-products";
 import {
@@ -42,6 +43,7 @@ export function CartDrawer({
   const badgeRef = useRef<HTMLSpanElement>(null);
   const previousCount = useRef(0);
   const reduceMotion = useReducedMotion();
+  const router = useRouter();
   const cartTotal = calculateCartTotal(items);
   const itemCount = getCartItemCount(items);
 
@@ -96,11 +98,15 @@ export function CartDrawer({
     };
   }, [isOpen, onClose]);
 
+  // En la portada baja a la sección; en otras páginas (como /menu) lleva a la portada en esa sección.
   const goTo = (id: string) => {
     onClose();
-    window.requestAnimationFrame(() => {
-      document.getElementById(id)?.scrollIntoView({ block: "start" });
-    });
+    const target = document.getElementById(id);
+    if (!target) {
+      router.push(`/#${id}`);
+      return;
+    }
+    window.requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
   };
 
   return (
@@ -294,7 +300,7 @@ function LineLayout({ thumbnail, name, details, notes, extras, footer, onRemove 
           <div className="flex items-start gap-2">
             <h3 className="min-w-0 flex-1 font-serif text-xl leading-tight text-[#F3E9D6]">{name}</h3>
             <button type="button" onClick={onRemove} aria-label={`Quitar ${name} del carrito`}
-              className="tap -mr-1 -mt-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-[#8c8278] hover:bg-red-500/10 hover:text-[#fca5a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400">
+              className="tap -mr-1.5 -mt-1.5 inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[#8c8278] hover:bg-red-500/10 hover:text-[#fca5a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400">
               <svg aria-hidden="true" viewBox="0 0 24 24" className="size-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>
             </button>
           </div>
@@ -318,7 +324,7 @@ function ExtraRow({ name, value, onChange }: { name: string; value: number; onCh
 }
 
 function MiniStepper({ label, value, onChange, small = false }: { label: string; value: number; onChange: (value: number) => void; small?: boolean }) {
-  const size = small ? "size-8 text-base" : "size-9 text-lg";
+  const size = small ? "size-9 text-base" : "size-10 text-lg";
   return (
     <div className="inline-flex items-center rounded-full bg-white/[.05] p-0.5">
       <button type="button" disabled={value <= 1} onClick={() => onChange(Math.max(1, value - 1))} aria-label={`Quitar uno de ${label}`}

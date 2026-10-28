@@ -75,7 +75,7 @@ function SummaryLine({ image, title, details, notes, subtotal, onRemove, removeL
       </div>
       <div className="flex shrink-0 flex-col items-end gap-0.5">
         <span className="text-[.9375rem] font-semibold tabular-nums text-[#F3E9D6]">{subtotal !== null ? formatMoney(subtotal) : "—"}</span>
-        <button type="button" onClick={onRemove} aria-label={`Eliminar ${removeLabel} del carrito`} title="Quitar" className="tap -mr-1.5 grid size-8 place-items-center rounded-full text-[#6f665d] hover:bg-red-500/10 hover:text-[#fca5a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0793E]">
+        <button type="button" onClick={onRemove} aria-label={`Eliminar ${removeLabel} del carrito`} title="Quitar" className="tap -mr-2 grid size-10 place-items-center rounded-full text-[#6f665d] hover:bg-red-500/10 hover:text-[#fca5a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0793E]">
           <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5" /></svg>
         </button>
       </div>

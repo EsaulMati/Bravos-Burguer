@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { SHARE_COMBOS } from "@/src/data/featured-products";
 import { Chip, SAUCE_CHOICES, isSauceActive, sauceChoiceLabel, toggleSauce } from "./SelectionControls";
@@ -45,12 +45,15 @@ function ComboCard({ combo, hiddenOnMobile, quantity, onQuantityChange, onAdd }:
   const [picking, setPicking] = useState(false);
   const [sauce, setSauce] = useState<SauceSelection>(null);
   const [added, setAdded] = useState(false);
-  const pickRef = useRef<HTMLDivElement>(null);
   const addRef = useRef<HTMLButtonElement>(null);
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => () => { if (timerRef.current !== null) window.clearTimeout(timerRef.current); }, []);
-  useEffect(() => { if (picking) pickRef.current?.querySelector("button")?.focus(); }, [picking]);
+  // Con AnimatePresence mode="wait" el panel de salsas aparece recién cuando sale el botón:
+  // el foco se pone al montarse el panel, no al cambiar el estado.
+  const focusFirstSauce = useCallback((node: HTMLDivElement | null) => {
+    if (node) window.requestAnimationFrame(() => node.querySelector<HTMLButtonElement>("[aria-pressed]")?.focus());
+  }, []);
 
   const confirm = () => {
     if (!sauce || !onAdd(sauce)) return;
@@ -76,13 +79,13 @@ function ComboCard({ combo, hiddenOnMobile, quantity, onQuantityChange, onAdd }:
         <div className="mt-3 min-h-[3.25rem]" onKeyDown={(event) => { if (event.key === "Escape" && picking) { setPicking(false); addRef.current?.focus(); } }}>
           <AnimatePresence mode="wait" initial={false}>
             {picking ? (
-              <motion.div key="pick" ref={pickRef} {...swap} transition={{ duration: .18, ease: EASE_OUT }}>
+              <motion.div key="pick" ref={focusFirstSauce} {...swap} transition={{ duration: .18, ease: EASE_OUT }}>
                 <div className="flex items-center justify-between gap-2">
                   <span id={`salsa-${combo.id}`} className="font-dosis text-xs font-bold uppercase tracking-[.1em] text-[#704126]">Salsas para las papas · elige una o varias</span>
                   <button type="button" aria-label="Cancelar" onClick={() => { setPicking(false); setSauce(null); addRef.current?.focus(); }} className="tap -my-2 inline-flex size-9 items-center justify-center rounded-full text-lg text-[#6B5D52] hover:bg-[#16110E]/[.07]">×</button>
                 </div>
-                <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
-                  <div role="group" aria-labelledby={`salsa-${combo.id}`} className="grid flex-1 grid-cols-4 gap-1.5">
+                <div className="mt-1.5 flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <div role="group" aria-labelledby={`salsa-${combo.id}`} className="flex flex-1 flex-wrap gap-1.5">
                     {SAUCE_CHOICES.map((option) => (
                       <Chip key={option} light multiple active={isSauceActive(sauce, option)} onClick={() => setSauce((current) => toggleSauce(current, option))}>{sauceChoiceLabel(option)}</Chip>
                     ))}

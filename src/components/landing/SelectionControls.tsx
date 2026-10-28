@@ -46,7 +46,8 @@ function ChipRow({ label, shortLabel, light, hideLabel, columns, multiple = fals
   return (
     <div role={multiple ? "group" : "radiogroup"} aria-label={label} className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2.5">
       {!hideLabel && <span aria-hidden="true" className={`shrink-0 font-dosis sm:w-14 text-xs font-bold uppercase tracking-[.1em] ${light ? "text-[#704126]" : "text-[#bca58c]"}`}>{shortLabel}</span>}
-      <div className={`grid min-w-0 flex-1 gap-1.5 ${columns === 4 ? "grid-cols-4" : "grid-cols-2"}`}>{children}</div>
+      {/* Las salsas van en fila y bajan a otra línea si no entran, en vez de cortar el nombre con "…". */}
+      <div className={`min-w-0 flex-1 gap-1.5 ${columns === 4 ? "flex flex-wrap" : "grid grid-cols-2"}`}>{children}</div>
     </div>
   );
 }
@@ -57,7 +58,7 @@ export function Chip({ active, light, multiple = false, onClick, children, class
   const state = multiple ? { "aria-pressed": active } : { role: "radio", "aria-checked": active };
   return (
     <button type="button" {...state} onClick={onClick}
-      className={`tap bravos-chip min-w-0 truncate rounded-full px-1.5 text-[.8125rem] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0793E] ${active ? "bg-[#B35629] text-white" : idle} ${className}`}>
+      className={`tap bravos-chip flex-1 whitespace-nowrap rounded-full px-2 text-xs font-medium sm:px-2.5 sm:text-[.8125rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0793E] ${active ? "bg-[#B35629] text-white" : idle} ${className}`}>
       {children}
     </button>
   );

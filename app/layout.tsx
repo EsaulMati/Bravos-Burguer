@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Anton, Barlow_Condensed, Knewave, Rubik } from "next/font/google";
 import { MotionProvider } from "@/src/components/MotionProvider";
-import { SHARE_IMAGE } from "@/src/data/seo";
+import { OPEN_GRAPH_BASE, SHARE_IMAGE } from "@/src/data/seo";
 import "./globals.css";
 
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton", display: "swap" });
@@ -26,12 +26,7 @@ export const metadata: Metadata = {
     shortcut: ["/brand/bravos-icono-64.png"],
     apple: [{ url: "/brand/bravos-icono-180.png", type: "image/png" }],
   },
-  openGraph: {
-    type: "website",
-    locale: "es_PE",
-    siteName: "Bravos Grill & Smoke",
-    images: [SHARE_IMAGE],
-  },
+  openGraph: OPEN_GRAPH_BASE,
   twitter: {
     card: "summary_large_image",
     images: [SHARE_IMAGE.url],

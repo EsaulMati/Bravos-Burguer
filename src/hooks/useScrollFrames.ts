@@ -63,8 +63,10 @@ export function useScrollFrames({ sectionRef, canvasRef, count, src, fit = "fill
       progressRef.current?.(p);
       // Mientras bajan los cuadros, muestra el más cercano que ya cargó.
       let index = frames.length === 1 ? 0 : Math.round(p * (frames.length - 1));
-      while (index > 0 && !frames[index].complete) index -= 1;
-      if (!frames[index].complete || (!force && index === drawn)) return;
+      // Un cuadro que no cargó (error de red) queda "complete" pero sin tamaño: dibujarlo lanza un error.
+      const ready = (image: HTMLImageElement) => image.complete && image.naturalWidth > 0;
+      while (index > 0 && !ready(frames[index])) index -= 1;
+      if (!ready(frames[index]) || (!force && index === drawn)) return;
       paint(frames[index]);
       drawn = index;
     };

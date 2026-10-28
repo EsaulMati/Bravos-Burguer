@@ -28,6 +28,7 @@ export const ADDITIONAL_PRODUCTS: AdditionalProduct[] = [
   { id: "extra-papas", name: "Porción de Papas", price: 5, image: "/bravos-papas-porcion.png" },
   { id: "extra-ranchera", name: "Salsa Ranchera", price: 3, image: "/bravos-salsa-ranchera.png.png" },
   { id: "extra-tartara", name: "Salsa Tártara", price: 3, image: "/bravos-salsa-tartara.png.png" },
+  { id: "extra-mayo-golf", name: "Salsa Mayo Golf", price: 3, image: "/bravos-salsa-mayo-golf.webp" },
   { id: "extra-coca-cola", name: "Coca-Cola", price: 5, image: "/bravos-gaseosa-cola.png" },
   { id: "extra-inca-kola", name: "Inca Kola", price: 5, image: "/bravos-gaseosa-vaso.png" },
 ];

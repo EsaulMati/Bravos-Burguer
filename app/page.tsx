@@ -5,7 +5,7 @@ import { BrandTicker } from "@/src/components/landing/BrandTicker";
 import { CatalogExperience } from "@/src/components/landing/CatalogExperience";
 import { FooterSimple } from "@/src/components/landing/FooterSimple";
 import { BRAVOS_WHATSAPP_NUMBER } from "@/src/data/contact";
-import { SHARE_IMAGE } from "@/src/data/seo";
+import { OPEN_GRAPH_BASE, SHARE_IMAGE } from "@/src/data/seo";
 
 const title = "Hamburguesas con delivery en Arequipa | Bravos Grill & Smoke";
 const description = "Hamburguesas a la plancha con delivery en Arequipa desde S/ 20. Arma tu pedido, envíalo por WhatsApp y paga con Yape o Plin. Al León hay que darle carne.";
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title: { absolute: title },
   description,
   alternates: { canonical: "/" },
-  openGraph: { url: "/", title, description, images: [SHARE_IMAGE] },
+  openGraph: { ...OPEN_GRAPH_BASE, url: "/", title, description },
   twitter: { card: "summary_large_image", title, description, images: [SHARE_IMAGE.url] },
 };
 

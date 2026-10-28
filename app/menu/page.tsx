@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { FooterSimple } from "@/src/components/landing/FooterSimple";
 import { Navbar } from "@/src/components/landing/Navbar";
 import { MenuCatalogExperience } from "@/src/components/menu/MenuCatalogExperience";
-import { SHARE_IMAGE } from "@/src/data/seo";
+import { OPEN_GRAPH_BASE, SHARE_IMAGE } from "@/src/data/seo";
 
 export const metadata: Metadata = {
   title: { absolute: "Menú de hamburguesas y precios en Arequipa | Bravos" },
   description: "La Gordita desde S/ 20, El León con doble carne desde S/ 25, combos Ya Pagaron para la manchita, papas y gaseosas. Arma tu pedido y envíalo por WhatsApp.",
   alternates: { canonical: "/menu" },
-  openGraph: { url: "/menu", title: "Menú de hamburguesas y precios en Arequipa | Bravos", images: [SHARE_IMAGE] },
+  openGraph: { ...OPEN_GRAPH_BASE, url: "/menu", title: "Menú de hamburguesas y precios en Arequipa | Bravos" },
   twitter: { card: "summary_large_image", images: [SHARE_IMAGE.url] },
 };
 

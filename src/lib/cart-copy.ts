@@ -6,6 +6,7 @@ const FEMININE_PRODUCT_NAMES = new Set([
   "Porción de Papas",
   "Salsa Ranchera",
   "Salsa Tártara",
+  "Salsa Mayo Golf",
   "Coca-Cola",
   "Inca Kola",
 ]);

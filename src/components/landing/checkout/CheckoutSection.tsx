@@ -152,7 +152,7 @@ export function CheckoutSection({ items, onOpenCart, onRemoveItem, onOrderConfir
         <FieldGroup step={1} title="¿A nombre de quién?">
           <div className="grid gap-3 sm:grid-cols-2">
             <FloatingField id="customerName" label="Tu nombre" value={draft.customerName} maxLength={80} error={errors.customerName} valid={nameOk} autoComplete="name" onChange={(customerName) => updateDraft({ customerName })} onBlur={() => updateDraft({ customerName: draft.customerName.trim() })} />
-            <FloatingField id="phone" label="Celular" prefix="+51" hint="9 dígitos, empieza en 9" value={draft.phone} maxLength={11} error={errors.phone} valid={phoneOk} inputMode="tel" autoComplete="tel" onChange={(phone) => updateDraft({ phone: normalizePeruvianPhone(phone) })} />
+            <FloatingField id="phone" label="Celular" prefix="+51" hint="9 dígitos, empieza en 9" value={draft.phone} maxLength={16} error={errors.phone} valid={phoneOk} inputMode="tel" autoComplete="tel" onChange={(phone) => updateDraft({ phone: normalizePeruvianPhone(phone) })} />
           </div>
         </FieldGroup>
         <FieldGroup step={2} title="¿Cómo vas a pagar?">

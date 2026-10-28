@@ -85,7 +85,7 @@ export function MenuCatalogExperience() {
         </nav>
         <div className="mx-auto mt-10 max-w-6xl space-y-14 px-4 sm:mt-12 sm:space-y-16 sm:px-6">
           {MENU_SECTIONS.map((section, sectionIndex) => (
-            <section key={section.id} id={section.id} className="scroll-mt-36" aria-labelledby={`category-${sectionIndex}`}>
+            <section key={section.id} id={section.id} className="scroll-mt-20" aria-labelledby={`category-${sectionIndex}`}>
               <div className="flex items-center gap-4">
                 <span className="h-0.5 w-10 bg-[#B35629]" aria-hidden="true" />
                 <h2
@@ -104,7 +104,7 @@ export function MenuCatalogExperience() {
                     <article
                       key={item.id}
                       id={item.id}
-                      className={`group menu-catalog-card menu-catalog-card--${item.orientation} scroll-mt-36`}
+                      className={`group menu-catalog-card menu-catalog-card--${item.orientation} scroll-mt-20`}
                     >
                       <div className="relative overflow-hidden bg-[#1c120d]">
                         <Image
@@ -139,12 +139,12 @@ export function MenuCatalogExperience() {
               </div>
             </section>
           ))}
-          <section id="adicionales" aria-labelledby="additional-products-title" className="scroll-mt-36 rounded-3xl border border-[#8f5a39]/25 bg-[#16110E] px-3 py-8 shadow-[0_24px_60px_rgba(52,24,10,.18)] sm:px-7 sm:py-10">
+          <section id="adicionales" aria-labelledby="additional-products-title" className="scroll-mt-20 rounded-3xl border border-[#8f5a39]/25 bg-[#16110E] px-3 py-8 shadow-[0_24px_60px_rgba(52,24,10,.18)] sm:px-7 sm:py-10">
             <div className="max-w-2xl">
               <h2 id="additional-products-title" className="font-serif text-4xl leading-none text-[#F3E9D6] sm:text-5xl">Agrégale algo más</h2>
               <p className="mt-3 text-sm leading-relaxed text-[#cdb197]">Cada adicional se agrega como un producto independiente a tu carrito.</p>
             </div>
-            <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+            <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
               {ADDITIONAL_PRODUCTS.map((item) => {
                 const quantity = quantities[item.id] ?? 1;
                 const hasPrice = item.price !== null;

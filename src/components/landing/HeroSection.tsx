@@ -63,7 +63,7 @@ export function HeroSection() {
           </h1>
           <div className="bravos-hero-actions">
             <p className="max-w-[22rem] text-[.9375rem] leading-relaxed text-[#f0dfc8] drop-shadow-[0_2px_12px_rgba(0,0,0,.8)] md:max-w-md md:text-lg">
-              La Gordita y El León, con doble carne, recién salidos de la plancha. Armas tu pedido aquí, lo mandas por WhatsApp y pagas con Yape o Plin.
+              El León con doble carne y La Gordita, recién salidos de la plancha. Armas tu pedido aquí, lo mandas por WhatsApp y pagas con Yape o Plin.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-3 md:mt-8">
               <a href="#armar-orden" className="bravos-button tap">Armar mi pedido</a>
