@@ -76,15 +76,21 @@ export function MenuCatalogExperience() {
   return (
     <>
       <Toast toast={toast} />
-      <div id="menu" className="menu-page-surface px-4 py-12 sm:px-6 sm:py-14">
-        <div className="mx-auto max-w-6xl space-y-14 sm:space-y-16">
+      <div id="menu" className="menu-page-surface pb-12 sm:pb-14">
+        <nav aria-label="Categorías del menú" className="menu-category-nav sticky top-[4.5rem] z-30 border-b border-[#16110E]/10 bg-[#F3E9D6] lg:top-20">
+          <ul className="scrollbar-hidden mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 py-2.5 sm:px-6">
+            {MENU_SECTIONS.map((section) => <li key={section.id} className="shrink-0"><a href={`#${section.id}`} className="tap inline-flex min-h-11 items-center rounded-full border border-[#16110E]/20 px-4 font-dosis text-[.95rem] font-semibold text-[#16110E] hover:bg-[#16110E] hover:text-[#F3E9D6]">{section.title}</a></li>)}
+            <li className="shrink-0"><a href="#adicionales" className="tap inline-flex min-h-11 items-center rounded-full border border-[#16110E]/20 px-4 font-dosis text-[.95rem] font-semibold text-[#16110E] hover:bg-[#16110E] hover:text-[#F3E9D6]">Adicionales</a></li>
+          </ul>
+        </nav>
+        <div className="mx-auto mt-10 max-w-6xl space-y-14 px-4 sm:mt-12 sm:space-y-16 sm:px-6">
           {MENU_SECTIONS.map((section, sectionIndex) => (
-            <section key={section.title} aria-labelledby={`category-${sectionIndex}`}>
+            <section key={section.id} id={section.id} className="scroll-mt-36" aria-labelledby={`category-${sectionIndex}`}>
               <div className="flex items-center gap-4">
-                <span className="h-px w-10 bg-[#b76b32]" aria-hidden="true" />
+                <span className="h-0.5 w-10 bg-[#B35629]" aria-hidden="true" />
                 <h2
                   id={`category-${sectionIndex}`}
-                  className="font-serif text-3xl font-bold text-[#382013] sm:text-4xl"
+                  className="font-serif text-4xl leading-none text-[#16110E] sm:text-6xl"
                 >
                   {section.title}
                 </h2>
@@ -97,7 +103,8 @@ export function MenuCatalogExperience() {
                   return (
                     <article
                       key={item.id}
-                      className={`group menu-catalog-card menu-catalog-card--${item.orientation}`}
+                      id={item.id}
+                      className={`group menu-catalog-card menu-catalog-card--${item.orientation} scroll-mt-36`}
                     >
                       <div className="relative overflow-hidden bg-[#1c120d]">
                         <Image
@@ -105,22 +112,25 @@ export function MenuCatalogExperience() {
                           alt={item.name}
                           fill
                           sizes="(max-width: 767px) 100vw, 44vw"
-                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                          className="object-cover transition-transform duration-300 ease-[var(--ease-out)] group-hover:scale-[1.02]"
                         />
                       </div>
                       <div className="px-1 pt-4 sm:px-2">
-                        <div className="flex items-center justify-between gap-5">
-                          <h3 className="font-serif text-xl font-bold leading-tight text-[#382013] sm:text-2xl">
+                        <div className="flex items-start justify-between gap-5">
+                          <h3 className="font-serif text-2xl leading-none text-[#16110E] sm:text-3xl">
                             {item.name}
                           </h3>
-                          <p className="shrink-0 font-dosis text-2xl font-bold tabular-nums text-[#9e4d20]">
-                            {money(item.price * (quantities[item.id] ?? 1))}
+                          <p className="shrink-0 font-serif text-3xl leading-none tabular-nums text-[#B35629]">
+                            {money(item.price)}
                           </p>
                         </div>
-                        <div className="mt-4"><QuantityControl label={`Cantidad de ${item.name}`} value={quantities[item.id] ?? 1} max={10} onChange={(quantity) => setQuantities((current) => ({ ...current, [item.id]: quantity }))} /></div>
+                        {item.description && <p className="mt-2 text-base leading-relaxed text-[#6B5D52]">{item.description}</p>}
                         {item.includesFries && <div className="mt-4"><SauceSelector light value={selection.sauce} onChange={(sauce) => { setSelections((current) => ({ ...current, [item.id]: { ...selection, sauce } })); setMessages((current) => ({ ...current, [item.id]: "" })); }} /></div>}
                         {item.includesDrink && <div className="mt-4"><DrinkSelector light value={selection.drink} onChange={(drink) => { setSelections((current) => ({ ...current, [item.id]: { ...selection, drink } })); setMessages((current) => ({ ...current, [item.id]: "" })); }} /></div>}
-                        <button type="button" onClick={() => addProduct(item.id)} className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-[#a84c1d] px-5 font-dosis text-sm font-bold text-white transition-colors hover:bg-[#833816] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a84c1d]">{wasAdded ? "Añadido" : "Añadir"}</button>
+                        <div className="mt-4 flex items-center gap-3">
+                          <QuantityControl light label={`Cantidad de ${item.name}`} value={quantities[item.id] ?? 1} max={10} onChange={(quantity) => setQuantities((current) => ({ ...current, [item.id]: quantity }))} />
+                          <button type="button" onClick={() => addProduct(item.id)} className="tap inline-flex min-h-12 flex-1 items-center justify-center bravos-fill rounded-full bg-[#B35629] px-5 font-sans text-base font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B35629] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3E9D6]">{wasAdded ? "Agregado ✓" : `Agregar · ${money(item.price * (quantities[item.id] ?? 1))}`}</button>
+                        </div>
                         <p aria-live="polite" className="mt-2 min-h-5 text-sm font-semibold text-[#9e3f20]">{messages[item.id]}</p>
                       </div>
                     </article>
@@ -129,17 +139,16 @@ export function MenuCatalogExperience() {
               </div>
             </section>
           ))}
-          <section aria-labelledby="additional-products-title" className="rounded-3xl border border-[#8f5a39]/25 bg-[#130d09] px-3 py-8 shadow-[0_24px_60px_rgba(52,24,10,.18)] sm:px-7 sm:py-10">
+          <section id="adicionales" aria-labelledby="additional-products-title" className="scroll-mt-36 rounded-3xl border border-[#8f5a39]/25 bg-[#16110E] px-3 py-8 shadow-[0_24px_60px_rgba(52,24,10,.18)] sm:px-7 sm:py-10">
             <div className="max-w-2xl">
-              <p className="font-dosis text-xs font-bold uppercase tracking-[.28em] text-[#e58e4d]">Un último toque</p>
-              <h2 id="additional-products-title" className="mt-2 font-serif text-3xl font-bold text-[#fff1df] sm:text-4xl">Agrégale algo más</h2>
+              <h2 id="additional-products-title" className="font-serif text-4xl leading-none text-[#F3E9D6] sm:text-5xl">Agrégale algo más</h2>
               <p className="mt-3 text-sm leading-relaxed text-[#cdb197]">Cada adicional se agrega como un producto independiente a tu carrito.</p>
             </div>
             <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
               {ADDITIONAL_PRODUCTS.map((item) => {
                 const quantity = quantities[item.id] ?? 1;
                 const hasPrice = item.price !== null;
-                return <article key={item.id} className="flex min-w-0 flex-col rounded-2xl border border-[#8f5a39]/20 bg-[#21140e] p-3 text-[#fff1df] shadow-[0_14px_30px_rgba(55,25,10,.14)] sm:p-4">
+                return <article key={item.id} className="flex min-w-0 flex-col rounded-2xl border border-[#8f5a39]/20 bg-[#21140e] p-3 text-[#F3E9D6] shadow-[0_14px_30px_rgba(55,25,10,.14)] sm:p-4">
                   <div className="relative aspect-square overflow-hidden rounded-xl bg-[radial-gradient(circle_at_50%_45%,#4a2919,#160d09_72%)]">
                     <Image src={item.image} alt={item.name} fill sizes="(max-width: 767px) 44vw, (max-width: 1023px) 30vw, 16vw" className="object-contain p-2.5 sm:p-3" />
                   </div>
@@ -147,7 +156,7 @@ export function MenuCatalogExperience() {
                     <h3 className="min-h-10 font-serif text-base font-bold leading-tight sm:text-lg">{item.name}</h3>
                     <p className="mt-1 font-dosis text-lg font-bold text-[#f0a35e]">{item.price !== null ? money(item.price * quantity) : "Precio pendiente"}</p>
                     <div className="mt-3"><QuantityControl label={`Cantidad de ${item.name}`} value={quantity} max={10} onChange={(next) => setQuantities((current) => ({ ...current, [item.id]: next }))} /></div>
-                    <button type="button" disabled={!hasPrice} onClick={() => addAdditional(item.id)} className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#b95722] px-3 font-dosis text-sm font-bold text-white transition-colors hover:bg-[#d1692a] disabled:cursor-not-allowed disabled:bg-[#4a3429] disabled:text-[#a98d7b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e59050]">{lastAddedId === item.id ? "Añadido" : hasPrice ? "Añadir" : "Sin precio"}</button>
+                    <button type="button" disabled={!hasPrice} onClick={() => addAdditional(item.id)} className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#B35629] px-3 font-dosis text-sm font-bold text-white transition-colors hover:bg-[#9E4A22] disabled:cursor-not-allowed disabled:bg-[#4a3429] disabled:text-[#a98d7b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e59050]">{lastAddedId === item.id ? "Agregado ✓" : hasPrice ? "Agregar" : "Sin precio"}</button>
                     <p aria-live="polite" className="mt-2 min-h-5 text-xs text-[#e4b98e]">{messages[item.id]}</p>
                   </div>
                 </article>;

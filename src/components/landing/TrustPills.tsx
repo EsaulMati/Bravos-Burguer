@@ -2,18 +2,13 @@ export function TrustPills() {
   const pillars = [
     {
       title: "Preparación al Momento",
-      description: "Cada hamburguesa y empanada se prepara al instante tras tu pedido.",
+      description: "Cada hamburguesa se prepara al instante tras tu pedido.",
       tag: "FRESCO",
     },
     {
       title: "Fuego & Sellado",
       description: "Carne a plancha caliente para concentrar sabor y conservar la jugosidad.",
       tag: "PLANCHA",
-    },
-    {
-      title: "Empanadas de Casa",
-      description: "Rellenos cocidos con paciencia y horneados hasta lograr el punto justo.",
-      tag: "HORNO",
     },
     {
       title: "Dark Kitchen en Arequipa",
@@ -29,18 +24,18 @@ export function TrustPills() {
           {pillars.map((pillar) => (
             <div
               key={pillar.title}
-              className="group flex flex-col justify-between rounded-2xl border border-white/5 bg-[#17171a] p-5 transition-colors duration-200 hover:border-[#f97316]/30"
+              className="group flex flex-col justify-between rounded-2xl border border-white/5 bg-[#211A15] p-5 transition-colors duration-200 hover:border-[#E0793E]/30"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="font-dosis font-bold text-xs uppercase px-2.5 py-0.5 rounded bg-white/5 text-[#f59e0b] border border-white/10 group-hover:border-[#f59e0b]/30 transition-colors">
+                  <span className="font-dosis font-bold text-xs uppercase px-2.5 py-0.5 rounded bg-white/5 text-[#E0793E] border border-white/10 group-hover:border-[#E0793E]/30 transition-colors">
                     {pillar.tag}
                   </span>
                 </div>
-                <h3 className="font-serif text-lg font-bold text-white mb-2 group-hover:text-[#f97316] transition-colors">
+                <h3 className="font-serif text-lg font-bold text-white mb-2 group-hover:text-[#E0793E] transition-colors">
                   {pillar.title}
                 </h3>
-                <p className="text-sm text-[#a1a1aa] leading-relaxed">
+                <p className="text-sm text-[#A39A8E] leading-relaxed">
                   {pillar.description}
                 </p>
               </div>

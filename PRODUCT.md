@@ -32,19 +32,22 @@ La experiencia debe funcionar en web móvil y escritorio. El usuario explora el 
 
 ## Brand Commitments
 
-- Nombre: Bravos Burger / Bravos Grill & Smoke.
-- Logo oficial: `/public/bravos-logo.png`.
-- Identidad: hamburguesas premium, grill, humo, madera, carbón, fuego, bronce, ámbar, crema y ambiente nocturno cálido.
+- Nombre: Bravos Grill & Smoke.
+- Logo oficial: escudo en `/public/brand/bravos-escudo.png` (versiones carbón, crema e íconos en la misma carpeta).
+- Paleta: Carbón #16110E, Crema #F3E9D6, Brasa #B35629, Fuego #E0793E, Humo #A39A8E, Tostado #6B5D52.
+- Tipografías: Knewave (brocha) para titulares grandes, Anton para nombres de productos y precios, Rubik para textos y botones, Barlow Condensed para etiquetas.
+- Identidad: hamburguesas premium, grill, humo, carbón, fuego y crema; secciones oscuras alternadas con secciones crema.
 - Evitar una interfaz uniformemente negra, saturada de naranja, bordes o brillos.
 - La fotografía gastronómica y los escenarios físicos deben liderar la experiencia.
 
 ## Evidence on Hand
 
 - Catálogo central existente en `src/data/featured-products.ts`.
-- Assets oficiales de La Gordita, El León, papas, gaseosas, empanadas y combos Ya Pagaron en `/public`.
-- Video principal `/public/bravos-hero.mp4`.
+- Assets oficiales de La Gordita, El León, papas, gaseosas y combos Ya Pagaron en `/public`. Las empanadas ya no se venden (retiradas el 2026-10-28).
+- Salsas para las papas: Ranchera, Tártara y Mayo Golf (se pueden elegir varias o "Sin salsa").
+- Hero: despiece de El León con scroll, en cuadros `/public/hero/web` y `/public/hero/cel` (el video anterior `/public/bravos-hero.mp4` ya no se usa).
 - Video específico del constructor y escenario publicitario de combos en `/public`.
-- No hay evidencia confirmada para Carnívora ni precios de empanadas o combos fuera de los datos existentes.
+- No hay evidencia confirmada para Carnívora ni precios de combos fuera de los datos existentes.
 
 ## Product Principles
 

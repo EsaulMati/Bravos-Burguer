@@ -2,22 +2,40 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ADDONS_DATA, BURGERS_DATA, calculateOrderPrice } from "@/src/data/featured-products";
 import type { OrderDraft } from "@/src/types/landing";
 import { DrinkSelector, SauceSelector } from "../SelectionControls";
 
 interface Props { order: OrderDraft; onUpdateOrder: (changes: Partial<OrderDraft>) => void; onAddToCart: () => void; cartFeedback: string }
 
+const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+
 export function MobileOrderBuilder({ order, onUpdateOrder, onAddToCart, cartFeedback }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const touchStart = useRef<{ x: number; pointerId: number } | null>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const reduceMotion = useReducedMotion();
   const burgerIndex = Math.max(0, BURGERS_DATA.findIndex((item) => item.id === order.burgerId));
   const burger = BURGERS_DATA[burgerIndex] ?? BURGERS_DATA[0];
   const fries = ADDONS_DATA.find((item) => item.id === "fries");
   const drink = ADDONS_DATA.find((item) => item.id === "drink");
   const total = calculateOrderPrice(order);
+
+  // El video del armador solo se descarga cuando la sección se acerca, igual que en escritorio.
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || shouldLoadVideo) return;
+    if (typeof window.IntersectionObserver !== "function") {
+      const fallbackTimer = window.setTimeout(() => setShouldLoadVideo(true), 0);
+      return () => window.clearTimeout(fallbackTimer);
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setShouldLoadVideo(true); observer.disconnect(); }
+    }, { rootMargin: "400px 0px" });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [shouldLoadVideo]);
 
   const selectBurger = (direction: -1 | 1) => {
     const next = (burgerIndex + direction + BURGERS_DATA.length) % BURGERS_DATA.length;
@@ -31,30 +49,35 @@ export function MobileOrderBuilder({ order, onUpdateOrder, onAddToCart, cartFeed
   };
 
   return (
-    <section ref={sectionRef} id="armar-orden" aria-labelledby="mobile-builder-title" className="mobile-builder relative min-h-[100svh] scroll-mt-24 overflow-hidden bg-[#130d09]">
-      <video src="/bravos-mobile-arma-tu-pedido.mp4.mp4" autoPlay loop muted playsInline preload="metadata" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+    <section ref={sectionRef} id="armar-orden" aria-labelledby="mobile-builder-title" className="mobile-builder relative min-h-[calc(100svh-4.5rem)] overflow-hidden bg-[#16110E]">
+      {shouldLoadVideo && <video src="/bravos-mobile-arma-tu-pedido.mp4.mp4" autoPlay loop muted playsInline preload="metadata" aria-hidden="true" className="builder-video pointer-events-none absolute inset-0 h-full w-full object-cover" />}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(12,8,5,.58)_0%,rgba(12,8,5,.05)_25%,rgba(12,8,5,.04)_62%,rgba(12,8,5,.84)_100%)]" />
-      <div className="relative mx-auto flex min-h-[100dvh] max-w-lg flex-col px-4 pb-4 pt-[clamp(3.75rem,8dvh,5rem)]">
-        <div className="text-center"><p className="font-dosis text-[.65rem] font-bold uppercase tracking-[.3em] text-[#e2a264]">A tu manera</p><h2 id="mobile-builder-title" className="mt-1 font-serif text-[clamp(2rem,9vw,2.5rem)] font-bold leading-none text-[#fff1d7]">Arma tu pedido</h2></div>
-        <div className="mobile-builder-product-stage relative mt-1 h-[clamp(14.5rem,35dvh,20rem)] shrink-0 select-none touch-pan-y" onPointerDown={(event) => { touchStart.current = { x: event.clientX, pointerId: event.pointerId }; try { event.currentTarget.setPointerCapture(event.pointerId); } catch {} }} onPointerUp={(event) => { finishSwipe(event.clientX); try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch {} }} onPointerCancel={(event) => { touchStart.current = null; try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch {} }}>
-          <button type="button" onClick={() => selectBurger(-1)} aria-label="Ver hamburguesa anterior" className="absolute left-0 top-[53%] z-40 grid size-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-[#160e09]/60 text-2xl text-white backdrop-blur-sm">‹</button>
-          <button type="button" onClick={() => selectBurger(1)} aria-label="Ver hamburguesa siguiente" className="absolute right-0 top-[53%] z-40 grid size-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-[#160e09]/60 text-2xl text-white backdrop-blur-sm">›</button>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={burger.id} initial={reduceMotion ? false : { opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -24 }} transition={{ duration: .2 }} className="absolute left-[4%] right-[4%] top-[3%] z-20 h-[86%]">
+      {/* Al tocar "Arma tu pedido" la sección ocupa justo la pantalla bajo la cabecera; abajo queda libre el botón del carrito. */}
+      <div className="relative mx-auto flex min-h-[calc(100svh-4.5rem)] max-w-lg flex-col justify-center px-4 pb-20 pt-4">
+        <div className="text-center"><h2 id="mobile-builder-title" className="font-brush text-[clamp(2.1rem,9vw,2.5rem)] leading-none text-[#F3E9D6]">Arma tu pedido</h2></div>
+        <div className="mobile-builder-product-stage relative mt-1 h-[clamp(14.5rem,35svh,20rem)] shrink-0 select-none touch-pan-y" onPointerDown={(event) => { touchStart.current = { x: event.clientX, pointerId: event.pointerId }; try { event.currentTarget.setPointerCapture(event.pointerId); } catch {} }} onPointerUp={(event) => { finishSwipe(event.clientX); try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch {} }} onPointerCancel={(event) => { touchStart.current = null; try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); } catch {} }}>
+          <AnimatePresence initial={false}>
+            <motion.div key={burger.id} initial={reduceMotion ? { opacity: 0 } : { opacity: 0, transform: "translateX(24px) scale(.96)" }} animate={{ opacity: 1, transform: "translateX(0px) scale(1)" }} exit={reduceMotion ? { opacity: 0 } : { opacity: 0, transform: "translateX(-24px) scale(.96)", transition: { duration: .15, ease: EASE_OUT } }} transition={{ duration: .25, ease: EASE_OUT }} className="absolute left-[4%] right-[4%] top-[3%] z-20 h-[86%]">
               <Image src={burger.cutoutImage ?? burger.image} alt={burger.name} fill sizes="70vw" className="object-contain drop-shadow-[0_22px_18px_rgba(20,7,2,.58)]" />
             </motion.div>
           </AnimatePresence>
           <AnimatePresence>
-            {order.friesEnabled && fries?.cutoutImage && <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} className="absolute bottom-[10%] left-[3%] z-30 h-[60%] w-[60%]"><Image src={fries.cutoutImage} alt="Papas" fill sizes="60vw" className="object-contain drop-shadow-[0_18px_13px_rgba(20,7,2,.5)]" /></motion.div>}
-            {order.drinkEnabled && drink?.cutoutImage && <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 8 }} className="absolute bottom-[11%] right-[2%] z-10 h-[74%] w-[57%]"><Image src={drink.cutoutImage} alt="Gaseosa" fill sizes="57vw" className="object-contain drop-shadow-[0_18px_13px_rgba(20,7,2,.5)]" /></motion.div>}
+            {order.friesEnabled && fries?.cutoutImage && <motion.div key="fries" initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -8 }} transition={{ duration: .2, ease: EASE_OUT }} className="absolute bottom-[10%] left-[3%] z-30 h-[60%] w-[60%]"><Image src={fries.cutoutImage} alt="Papas" fill sizes="60vw" className="object-contain drop-shadow-[0_18px_13px_rgba(20,7,2,.5)]" /></motion.div>}
+            {order.drinkEnabled && drink?.cutoutImage && <motion.div key="drink" initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 8 }} transition={{ duration: .2, ease: EASE_OUT }} className="absolute bottom-[11%] right-[2%] z-10 h-[74%] w-[57%]"><Image src={drink.cutoutImage} alt="Gaseosa" fill sizes="57vw" className="object-contain drop-shadow-[0_18px_13px_rgba(20,7,2,.5)]" /></motion.div>}
           </AnimatePresence>
         </div>
-        <div className="mt-0 rounded-2xl border border-white/10 bg-[#160e09]/88 p-3 text-white shadow-2xl backdrop-blur-md">
-          <div className="flex items-end justify-between gap-3"><div><p className="font-serif text-2xl font-bold leading-none">{burger.name}</p><p className="mt-1 text-xs text-[#d7b997]">Desliza o usa las flechas</p></div><output aria-live="polite" className="font-dosis text-3xl font-bold tabular-nums">S/ {total?.toFixed(0)}</output></div>
-          <div className="mt-3 flex gap-2"><Toggle active={order.friesEnabled} label="Papas" onClick={() => onUpdateOrder({ friesEnabled: !order.friesEnabled, friesQuantity: 1, sauce: null })} /><Toggle active={order.drinkEnabled} label="Gaseosa" onClick={() => onUpdateOrder({ drinkEnabled: !order.drinkEnabled, drinkQuantity: 1, drink: null })} /></div>
-          {order.friesEnabled && <div className="mt-2"><SauceSelector value={order.sauce} onChange={(sauce) => onUpdateOrder({ sauce })} /></div>}
-          {order.drinkEnabled && <div className="mt-2"><DrinkSelector value={order.drink} onChange={(drink) => onUpdateOrder({ drink })} /></div>}
-          <button type="button" onClick={onAddToCart} className="mt-3 min-h-12 w-full rounded-full bg-[#c96325] px-6 font-dosis text-lg font-bold text-white active:bg-[#a84c18] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb36e]">Añadir pedido</button>
+        <div className="mt-0 rounded-2xl border border-white/10 bg-[#160e09]/95 p-3 text-white shadow-2xl">
+          <div role="group" aria-label="Elige tu burger" className="grid grid-cols-2 gap-2">
+            {BURGERS_DATA.map((item) => {
+              const active = item.id === burger.id;
+              return <button key={item.id} type="button" aria-pressed={active} onClick={() => onUpdateOrder({ burgerId: item.id })} className={`tap min-h-14 rounded-xl px-3 py-2 text-left ${active ? "bg-[#f3dfbf] text-[#2a170d]" : "bg-white/[.06] text-[#f0d9bd]"}`}><span className="block font-serif text-xl leading-none">{item.name}</span><span className="mt-1 block font-dosis text-sm font-bold">S/ {item.price}</span></button>;
+            })}
+          </div>
+          <div className="mt-2 flex gap-2"><Toggle active={order.friesEnabled} label={`Papas S/ ${fries?.price}`} onClick={() => onUpdateOrder({ friesEnabled: !order.friesEnabled, friesQuantity: 1, sauce: null })} /><Toggle active={order.drinkEnabled} label={`Gaseosa S/ ${drink?.price}`} onClick={() => onUpdateOrder({ drinkEnabled: !order.drinkEnabled, drinkQuantity: 1, drink: null })} /></div>
+          {order.friesEnabled && <div className="mt-2"><SauceSelector hideLabel value={order.sauce} onChange={(sauce) => onUpdateOrder({ sauce })} /></div>}
+          {order.drinkEnabled && <div className="mt-2"><DrinkSelector hideLabel value={order.drink} onChange={(drink) => onUpdateOrder({ drink })} /></div>}
+          <div className="mt-3 flex items-center justify-between"><span className="font-dosis text-base font-semibold text-[#d9bf9c]">Total</span><output aria-live="polite" className="font-serif text-3xl leading-none tabular-nums">S/ {total?.toFixed(0)}</output></div>
+          <button type="button" onClick={onAddToCart} className="tap bravos-fill mt-2 min-h-12 w-full rounded-full bg-[#B35629] px-6 font-sans text-base font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb36e]">Agregar al carrito</button>
           {cartFeedback && <p aria-live="polite" className="pt-1.5 text-center text-xs text-[#b8d9b4]">{cartFeedback}</p>}
         </div>
       </div>
@@ -63,5 +86,5 @@ export function MobileOrderBuilder({ order, onUpdateOrder, onAddToCart, cartFeed
 }
 
 function Toggle({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
-  return <button type="button" aria-pressed={active} onClick={onClick} className={`min-h-11 flex-1 rounded-full border px-4 font-dosis text-sm font-bold transition-colors ${active ? "border-[#e99a54] bg-[#f2dfc2] text-[#2a170d]" : "border-white/20 bg-white/[.06] text-[#f0d9bd]"}`}>{active ? "✓" : "+"} {label}</button>;
+  return <button type="button" aria-pressed={active} onClick={onClick} className={`tap min-h-11 flex-1 rounded-full border px-3 font-dosis text-sm font-bold ${active ? "border-[#e99a54] bg-[#f2dfc2] text-[#2a170d]" : "border-white/20 bg-white/[.06] text-[#f0d9bd]"}`}>{active ? "" : "+ "}{label}</button>;
 }

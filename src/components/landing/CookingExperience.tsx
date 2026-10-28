@@ -1,117 +1,70 @@
 "use client";
 
-import Image from "next/image";
-import { useRef, useState } from "react";
-import {
-  motion,
-  useMotionValueEvent,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-} from "motion/react";
-import { useMobileViewport } from "@/src/hooks/useMobileViewport";
-import { MobileCookingExperience } from "./MobileCookingExperience";
+import { useCallback, useRef } from "react";
+import { useScrollFrames, type FrameSet } from "@/src/hooks/useScrollFrames";
 
-const RAW_IMAGE = "/bravos-fondo-parrilla-cocina-cruda.webp";
-const COOKED_IMAGE = "/bravos-fondo-parrilla-cocina-cocida.webp";
+// Plancha (public/plancha): 60 cuadros por versión; la carne pasa de cruda a sellada y el queso se derrite al final.
+const FRAME_COUNT = 60;
+const LAST_FRAME = FRAME_COUNT - 1;
+const frameSrc = (set: FrameSet, index: number) => `/plancha/${set}/${String(index).padStart(3, "0")}.webp`;
 const INITIAL_TEMPERATURE = 25;
 const FINAL_TEMPERATURE = 160;
 
+const temperatureFor = (progress: number) => progress >= 0.999
+  ? FINAL_TEMPERATURE
+  : Math.min(FINAL_TEMPERATURE - 1, Math.round(INITIAL_TEMPERATURE + (FINAL_TEMPERATURE - INITIAL_TEMPERATURE) * progress));
+
 export function CookingExperience() {
-  const isMobile = useMobileViewport();
-  return isMobile ? <MobileCookingExperience /> : <DesktopCookingExperience />;
-}
-
-function DesktopCookingExperience() {
   const sectionRef = useRef<HTMLElement>(null);
-  const reduceMotion = useReducedMotion();
-  const [temperature, setTemperature] = useState(
-    reduceMotion ? FINAL_TEMPERATURE : INITIAL_TEMPERATURE
-  );
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"],
-  });
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const temperatureRef = useRef<HTMLSpanElement>(null);
+  const thermometerRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLSpanElement>(null);
 
-  const rawOpacity = useTransform(scrollYProgress, [0, 0.6, 0.85, 1], [1, 1, 0, 0]);
-  const cookedOpacity = useTransform(scrollYProgress, [0, 0.6, 0.85, 1], [0, 0, 1, 1]);
-  const thermometerFill = useTransform(scrollYProgress, [0, 1], [0.08, 1]);
-  const finalCopyOpacity = useTransform(scrollYProgress, [0.7, 0.8, 1], [0, 1, 1]);
-
-  useMotionValueEvent(scrollYProgress, "change", (progress) => {
-    if (!reduceMotion) {
-      const next = progress >= 0.999
-        ? FINAL_TEMPERATURE
-        : Math.min(FINAL_TEMPERATURE - 1, Math.round(INITIAL_TEMPERATURE + 134 * progress));
-      setTemperature(next);
-    }
-  });
-
-  const displayedTemperature = reduceMotion ? FINAL_TEMPERATURE : temperature;
+  // El termómetro sube junto con la cocción; se escribe directo en el DOM para no renderizar en cada cuadro.
+  const onProgress = useCallback((progress: number) => {
+    const temperature = temperatureFor(progress);
+    if (temperatureRef.current) temperatureRef.current.textContent = String(temperature);
+    thermometerRef.current?.setAttribute("aria-label", `Temperatura de la plancha: ${temperature} grados Celsius`);
+    if (fillRef.current) fillRef.current.style.transform = `scaleY(${(0.08 + 0.92 * progress).toFixed(3)})`;
+  }, []);
+  // Con movimiento reducido se muestra directo la carne lista con queso.
+  useScrollFrames({ sectionRef, canvasRef, count: FRAME_COUNT, src: frameSrc, fit: "cover", stillIndex: LAST_FRAME, lazy: true, onProgress });
 
   return (
-    <section
-      ref={sectionRef}
-      aria-labelledby="cooking-experience-title"
-      className={`cooking-scroll-section ${reduceMotion ? "cooking-scroll-section--reduced" : ""}`}
-    >
+    <section ref={sectionRef} aria-labelledby="cooking-experience-title" className="cooking-scroll-section">
       <div className="cooking-sticky-scene">
         <div className="absolute inset-0 bg-[#0a0705]">
-          <motion.div
-            className="absolute inset-0 will-change-[opacity]"
-            style={{ opacity: reduceMotion ? 0 : rawOpacity }}
-          >
-            <Image
-              src={RAW_IMAGE}
-              alt="Cuatro carnes crudas sobre la parrilla de Bravos"
-              fill
-              sizes="100vw"
-              className="cooking-scene-image"
-            />
-          </motion.div>
-          <motion.div
-            className="absolute inset-0 will-change-[opacity]"
-            style={{ opacity: reduceMotion ? 1 : cookedOpacity }}
-          >
-            <Image
-              src={COOKED_IMAGE}
-              alt=""
-              fill
-              sizes="100vw"
-              className="cooking-scene-image"
-            />
-          </motion.div>
+          <picture>
+            <source media="(max-width: 767px), (max-aspect-ratio: 1/1)" srcSet={frameSrc("cel", 0)} />
+            {/* Primer cuadro mientras carga la secuencia; el canvas dibuja encima. */}
+            <img src={frameSrc("web", 0)} alt="Carne de res sellándose en la plancha de Bravos" loading="lazy" decoding="async" className="cooking-scene-image absolute inset-0 h-full w-full" />
+          </picture>
+          <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
         </div>
 
         <div className="cooking-scene-shade" aria-hidden="true" />
 
-        <div className="absolute inset-x-0 top-[14%] z-10 mx-auto max-w-7xl px-5 sm:top-[16%] sm:px-8 lg:px-12">
-          <motion.p
-            id="cooking-experience-title"
-            className="absolute left-5 top-0 max-w-[12ch] font-serif text-4xl font-bold leading-[0.95] text-[#fff1df] drop-shadow-[0_3px_18px_rgba(0,0,0,.75)] sm:left-8 sm:text-6xl lg:left-12 lg:text-7xl"
-            style={{ opacity: reduceMotion ? 1 : finalCopyOpacity }}
-          >
-            Listas para ser Bravos a lo bravo.
-          </motion.p>
+        <div className="absolute inset-x-0 top-[12%] z-10 mx-auto max-w-7xl px-5 sm:top-[16%] sm:px-8 lg:px-12">
+          <h2 id="cooking-experience-title" className="max-w-[11ch] font-brush text-[2.1rem] leading-[1] text-[#F3E9D6] drop-shadow-[0_3px_18px_rgba(0,0,0,.75)] sm:max-w-[13ch] sm:text-5xl lg:text-6xl">
+            Directo de la plancha a tu puerta.
+          </h2>
         </div>
 
-        <div className="cooking-thermometer" aria-label={`Temperatura visual: ${displayedTemperature} grados Celsius`}>
+        <div ref={thermometerRef} className="cooking-thermometer" aria-label={`Temperatura de la plancha: ${INITIAL_TEMPERATURE} grados Celsius`}>
           <div className="cooking-temperature" aria-hidden="true">
-            <span>{displayedTemperature}</span>
+            <span ref={temperatureRef} className="bravos-cooking-temperature">{INITIAL_TEMPERATURE}</span>
             <span className="text-[.45em] align-top">°C</span>
           </div>
           <div className="cooking-thermometer-body" aria-hidden="true">
             <span className="cooking-thermometer-mark cooking-thermometer-mark--one" />
             <span className="cooking-thermometer-mark cooking-thermometer-mark--two" />
             <span className="cooking-thermometer-mark cooking-thermometer-mark--three" />
-            <motion.span
-              className="cooking-thermometer-fill"
-              style={{ scaleY: reduceMotion ? 1 : thermometerFill }}
-            />
+            <span ref={fillRef} className="cooking-thermometer-fill" style={{ transform: "scaleY(.08)" }} />
           </div>
           <div className="cooking-thermometer-bulb" aria-hidden="true" />
-          <span className="mt-4 text-[.58rem] font-semibold uppercase tracking-[.2em] text-[#e2c4a4]">
-            Temperatura visual
+          <span className="mt-4 font-dosis text-sm font-bold uppercase tracking-[.12em] text-[#e2c4a4]">
+            Plancha
           </span>
         </div>
       </div>

@@ -1,49 +1,71 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BRAVOS_WHATSAPP_NUMBER } from "@/src/data/contact";
 
-const INSTAGRAM_URL =
-  "https://www.instagram.com/bravosgrillsmoke?igsi=N2t0Zm5zNXNpYmpk";
+const INSTAGRAM_URL = "https://www.instagram.com/bravosgrillsmoke";
+const WHATSAPP_URL = `https://wa.me/${BRAVOS_WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Bravos, quiero hacer un pedido")}`;
 
 export function FooterSimple() {
   return (
-    <footer id="contacto" className="border-t border-[#c98a51]/20 bg-[#0d0907] px-4 py-10 sm:px-6 sm:py-12">
+    <footer id="contacto" className="bravos-footer px-4 pb-28 pt-14 sm:px-6 sm:pt-20 md:pb-12">
       <div className="mx-auto max-w-6xl">
-        <div className="flex flex-col items-center justify-between gap-8 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-5 text-center sm:text-left">
+        <div className="mb-14 border-b border-[rgba(243,233,214,.15)] pb-14 sm:mb-16 sm:pb-16">
+          <h2 className="font-brush text-[clamp(2.75rem,9vw,7rem)] leading-[1] text-[var(--bravos-cream)]">La plancha está lista</h2>
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-[#d9cdb9] sm:text-lg">Arma tu pedido y nos llega por WhatsApp. Pagas con Yape o Plin.</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link href="/#armar-orden" className="bravos-button tap">Armar mi pedido</Link>
+          </div>
+        </div>
+        <div className="grid gap-7 md:grid-cols-2 md:gap-10 lg:grid-cols-[1.4fr_1fr_1fr_.8fr]">
+          <div>
             <Link
-              href="/"
-              aria-label="Bravos Burger, volver al inicio"
-              className="relative block size-16 shrink-0 overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d68a48]"
+              href="/#inicio"
+              aria-label="Bravos Grill & Smoke, volver al inicio"
+              className="inline-flex"
             >
-              <Image src="/bravos-logo.png" alt="Bravos Grill & Smoke" fill sizes="64px" className="object-cover" />
+              <Image src="/brand/bravos-escudo.png" alt="" width={1043} height={937} sizes="144px" className="h-32 w-auto" />
             </Link>
-            <div>
-              <p className="font-serif text-2xl font-bold leading-none text-[#fff0dc]">BRAVOS</p>
-              <p className="mt-2 text-sm leading-relaxed text-[#c9ad91]">
-                Secret Location<br />Dark Kitchen
-              </p>
-            </div>
+            <p className="mt-5 font-serif text-2xl leading-none text-[var(--bravos-fire)]">Al León hay que darle carne</p>
+            <p className="mt-3 text-sm leading-relaxed text-[#d9cdb9]">
+              Cocina solo para delivery en Arequipa
+            </p>
           </div>
 
-          <div className="flex items-center gap-3" aria-label="Enlaces de Bravos">
+          <div className="lg:order-3">
+            <h3 className="font-dosis text-base font-semibold text-[var(--bravos-fire)]">Pedidos</h3>
+            <ul className="mt-2 text-sm">
+              <li><a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="bravos-footer-link">WhatsApp <span aria-hidden="true">↗</span></a></li>
+            </ul>
+          </div>
+
+          <nav aria-label="Navegación del pie de página" className="lg:order-2">
+            <h3 className="font-dosis text-base font-semibold text-[var(--bravos-fire)]">Navegación</h3>
+            <ul className="mt-2 grid grid-cols-2 gap-x-4 text-sm md:grid-cols-1">
+              <li><Link href="/#inicio" className="bravos-footer-link">Inicio</Link></li>
+              <li><Link href="/menu" className="bravos-footer-link">Menú</Link></li>
+              <li><Link href="/#combos" className="bravos-footer-link">Para la Manchita</Link></li>
+              <li><Link href="/#armar-orden" className="bravos-footer-link">Arma tu pedido</Link></li>
+            </ul>
+          </nav>
+
+          <div className="lg:order-4">
+            <h3 className="font-dosis text-base font-semibold text-[var(--bravos-fire)]">Social</h3>
             <a
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram de Bravos"
-              className="footer-icon-link"
+              className="bravos-footer-link mt-2 text-sm"
             >
-              <InstagramIcon />
+              <InstagramIcon /> @bravosgrillsmoke <span aria-hidden="true">↗</span>
             </a>
           </div>
         </div>
 
-        <div className="mt-8 flex items-center gap-4 border-t border-[#c98a51]/12 pt-5">
-          <span className="h-px flex-1 bg-gradient-to-r from-[#a96936]/35 to-transparent" aria-hidden="true" />
-          <p className="text-center text-[.68rem] uppercase tracking-[.16em] text-[#806b59]">
-            © {new Date().getFullYear()} Bravos Burger · Arequipa, Perú
+        <div className="bravos-footer-legal mt-8 border-t pt-5">
+          <p className="text-xs leading-relaxed">
+            © {new Date().getFullYear()} Bravos Grill &amp; Smoke · Arequipa, Perú
           </p>
-          <span className="h-px flex-1 bg-gradient-to-l from-[#a96936]/35 to-transparent" aria-hidden="true" />
         </div>
       </div>
     </footer>

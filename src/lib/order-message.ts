@@ -11,7 +11,7 @@ const PAYMENT_LABELS: Record<PaymentMethod, string> = {
 export function buildOrderMessage(cart: Cart, checkout: CheckoutDraft): string {
   const cartSubtotal = calculateCartTotal(cart.items);
   const lines: string[] = [
-    "🔥 BRAVOS BURGER",
+    "🔥 BRAVOS GRILL & SMOKE",
     "Nuevo pedido",
     "",
     "Cliente",

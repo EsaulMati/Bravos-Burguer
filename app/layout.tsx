@@ -1,42 +1,40 @@
 import type { Metadata, Viewport } from "next";
+import { Anton, Barlow_Condensed, Knewave, Rubik } from "next/font/google";
+import { MotionProvider } from "@/src/components/MotionProvider";
+import { SHARE_IMAGE } from "@/src/data/seo";
 import "./globals.css";
 
+const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton", display: "swap" });
+const rubik = Rubik({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-rubik", display: "swap" });
+const barlowCondensed = Barlow_Condensed({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-barlow-condensed", display: "swap" });
+const knewave = Knewave({ subsets: ["latin"], weight: "400", variable: "--font-knewave", display: "swap" });
+
 export const viewport: Viewport = {
-  themeColor: "#0c0c0e",
+  themeColor: "#16110E",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
-  title: "Bravos Burger | Hamburguesas y empanadas en Arequipa",
+  metadataBase: new URL("https://bravossburguer.pro"),
+  title: { default: "Bravos Grill & Smoke", template: "%s | Bravos Grill & Smoke" },
   description:
-    "Menú de hamburguesas y empanadas de Bravos Burger en Arequipa. Arma tu orden, guárdala localmente y déjala lista para enviar por WhatsApp.",
-  keywords: [
-    "hamburguesas Arequipa",
-    "dark kitchen Arequipa",
-    "Bravos Burger",
-    "empanadas artesanales Arequipa",
-    "hamburguesas artesanales Arequipa",
-  ],
+    "Hamburguesas a la plancha con delivery en Arequipa. Arma tu pedido, envíalo por WhatsApp y paga con Yape o Plin. Al León hay que darle carne.",
   icons: {
-    icon: [{ url: "/bravos-logo.png", type: "image/png" }],
-    shortcut: ["/bravos-logo.png"],
-    apple: [{ url: "/bravos-logo.png", type: "image/png" }],
+    icon: [{ url: "/brand/bravos-icono-64.png", type: "image/png" }],
+    shortcut: ["/brand/bravos-icono-64.png"],
+    apple: [{ url: "/brand/bravos-icono-180.png", type: "image/png" }],
   },
   openGraph: {
-    title: "Bravos Burger | Hamburguesas y empanadas en Arequipa",
-    description:
-      "Explora el menú de Bravos Burger y prepara tu orden desde el navegador.",
     type: "website",
     locale: "es_PE",
-    siteName: "Bravos Burger",
+    siteName: "Bravos Grill & Smoke",
+    images: [SHARE_IMAGE],
   },
   twitter: {
-    card: "summary",
-    title: "Bravos Burger | Hamburguesas y empanadas en Arequipa",
-    description:
-      "Explora el menú de Bravos Burger y prepara tu orden desde el navegador.",
+    card: "summary_large_image",
+    images: [SHARE_IMAGE.url],
   },
 };
 
@@ -48,10 +46,11 @@ export default function RootLayout({
   return (
     <html
       lang="es-PE"
-      className="h-full scroll-smooth antialiased"
+      data-scroll-behavior="smooth"
+      className={`${anton.variable} ${rubik.variable} ${barlowCondensed.variable} ${knewave.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#0c0c0e] text-[#fafafa] font-sans selection:bg-[#f97316] selection:text-white">
-        {children}
+      <body className="min-h-full flex flex-col bg-[#16110E] text-[#F3E9D6] font-sans selection:bg-[#B35629] selection:text-white">
+        <MotionProvider>{children}</MotionProvider>
       </body>
     </html>
   );

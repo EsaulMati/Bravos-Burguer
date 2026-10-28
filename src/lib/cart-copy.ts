@@ -8,8 +8,6 @@ const FEMININE_PRODUCT_NAMES = new Set([
   "Salsa Tártara",
   "Coca-Cola",
   "Inca Kola",
-  "Empanada Argentina",
-  "Empanada de Osobuco",
 ]);
 
 export function addedToCartMessage(name: string): string {

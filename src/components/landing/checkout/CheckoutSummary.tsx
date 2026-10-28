@@ -1,6 +1,9 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
-import { ADDONS_DATA, BURGERS_DATA } from "@/src/data/featured-products";
-import { calculateCartItemSubtotal, calculateCartTotal, formatSauceSelection, getCartItemImage, isCatalogCartItem } from "@/src/lib/cart";
+import { BURGERS_DATA } from "@/src/data/featured-products";
+import { calculateCartItemSubtotal, calculateCartTotal, formatSauceSelection, getCartItemCount, getCartItemImage, isCatalogCartItem } from "@/src/lib/cart";
 import type { CartItem } from "@/src/types/landing";
 
 interface CheckoutSummaryProps {
@@ -9,110 +12,77 @@ interface CheckoutSummaryProps {
   onRemoveItem: (item: CartItem) => void;
 }
 
+/* Resumen del pedido. En celular va arriba y cerrado (solo cantidad y total); en computadora queda fijo a la derecha. */
 export function CheckoutSummary({ items, onOpenCart, onRemoveItem }: CheckoutSummaryProps) {
+  const [open, setOpen] = useState(false);
   const cartTotal = calculateCartTotal(items);
-  const friesAddon = ADDONS_DATA.find((addon) => addon.id === "fries");
-  const drinkAddon = ADDONS_DATA.find((addon) => addon.id === "drink");
+  const count = getCartItemCount(items);
 
   return (
-    <aside className="min-w-0 rounded-3xl border border-white/10 bg-[#17171a] p-5 lg:sticky lg:top-24 lg:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="font-dosis text-xs font-bold uppercase tracking-[0.14em] text-[#f59e0b]">
-            Resumen final
-          </p>
-          <h3 className="mt-1 font-serif text-2xl font-bold text-white">Tu pedido Bravos</h3>
+    <aside aria-labelledby="checkout-summary-title" className="min-w-0 rounded-[1.75rem] border border-white/[.07] bg-[#1b130e] lg:sticky lg:top-28">
+      <div className="flex items-center gap-3 px-5 pb-1 pt-4 lg:px-6 lg:pt-5">
+        <div className="flex min-w-0 flex-1 items-baseline gap-2">
+          <h2 id="checkout-summary-title" className="font-brush text-xl leading-none text-[#F3E9D6]">Tu pedido</h2>
+          <span className="text-sm text-[#8c8278]">{count} {count === 1 ? "producto" : "productos"}</span>
         </div>
-        <button
-          type="button"
-          onClick={onOpenCart}
-          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-white/10 px-3 font-dosis text-sm font-bold text-[#d4d4d8] hover:border-[#f97316]/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]"
-        >
+        <button type="button" onClick={onOpenCart} className="tap inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-[#E0793E] hover:bg-[#E0793E]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0793E]">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
           Editar
         </button>
       </div>
 
-      <ol className="mt-6 space-y-4" aria-label="Órdenes que se prepararán">
-        {items.map((item, index) => {
-          if (isCatalogCartItem(item)) {
-            const subtotal = calculateCartItemSubtotal(item);
-            return (
-              <li key={item.id} className="rounded-2xl bg-[#101012] p-4">
-                <div className="flex items-start gap-3">
-                  <Thumbnail src={getCartItemImage(item)} alt={item.name} />
-                  <div className="min-w-0">
-                    <p className="font-dosis text-xs font-bold uppercase tracking-wider text-[#71717a]">Producto {index + 1}</p>
-                    <p className="mt-1 font-semibold text-white">{item.quantity} × {item.name}</p>
-                    {item.sauce && <p className="mt-1 text-xs text-[#a1a1aa]">Salsas: {formatSauceSelection(item.sauce)}</p>}
-                    {item.drink && <p className="text-xs text-[#a1a1aa]">Gaseosa: {item.drink}</p>}
-                  </div>
-                  <ItemActions name={item.name} subtotal={subtotal} onRemove={() => onRemoveItem(item)} />
-                </div>
-              </li>
-            );
-          }
+      <button type="button" aria-expanded={open} aria-controls="checkout-summary-list" onClick={() => setOpen((value) => !value)} className="tap flex min-h-11 w-full items-center gap-2 px-5 text-left text-sm text-[#bca58c] lg:hidden">
+        {open ? "Ocultar detalle" : "Ver detalle"}
+        <svg aria-hidden="true" viewBox="0 0 24 24" className={`size-4 transition-transform duration-300 ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m6 9 6 6 6-6" /></svg>
+      </button>
 
+      <ol id="checkout-summary-list" aria-label="Productos del pedido" className={`space-y-3 px-5 pt-1 lg:block lg:px-6 lg:pt-4 ${open ? "block" : "hidden"}`}>
+        {items.map((item) => {
+          const subtotal = calculateCartItemSubtotal(item);
+          if (isCatalogCartItem(item)) {
+            const details = [item.sauce && `Salsa: ${formatSauceSelection(item.sauce)}`, item.drink && item.drink].filter(Boolean).join(" · ");
+            return <SummaryLine key={item.id} image={getCartItemImage(item)} title={`${item.quantity} × ${item.name}`} details={details} subtotal={subtotal} onRemove={() => onRemoveItem(item)} removeLabel={item.name} />;
+          }
           const burger = BURGERS_DATA.find((product) => product.id === item.burgerId);
           if (!burger) return null;
-          const subtotal = calculateCartItemSubtotal(item);
-
-          return (
-            <li key={item.id} className="rounded-2xl bg-[#101012] p-4">
-              <div className="flex items-start gap-3">
-                <Thumbnail src={getCartItemImage(item)} alt={burger.name} />
-                <div className="min-w-0">
-                  <p className="font-dosis text-xs font-bold uppercase tracking-wider text-[#71717a]">
-                    Orden {index + 1}
-                  </p>
-                  <p className="mt-1 font-semibold text-white">
-                    {item.burgerQuantity} × {burger.name}
-                  </p>
-                </div>
-                <ItemActions name={burger.name} subtotal={subtotal} onRemove={() => onRemoveItem(item)} />
-              </div>
-              <ul className="mt-2 space-y-1 text-sm text-[#a1a1aa]">
-                {item.friesEnabled && friesAddon && (
-                  <li>{item.friesQuantity} × {friesAddon.name}</li>
-                )}
-                {item.friesEnabled && item.sauce && <li>Salsas: {formatSauceSelection(item.sauce)}</li>}
-                {item.drinkEnabled && drinkAddon && (
-                  <li>{item.drinkQuantity} × {drinkAddon.name}</li>
-                )}
-                {item.drinkEnabled && item.drink && <li>Gaseosa: {item.drink}</li>}
-              </ul>
-              {item.notes && (
-                <p className="mt-3 break-words border-t border-white/5 pt-3 text-xs leading-relaxed text-[#d4d4d8]">
-                  <span className="font-bold text-[#f59e0b]">Indicaciones:</span> {item.notes}
-                </p>
-              )}
-            </li>
-          );
+          const details = [
+            item.friesEnabled ? `${item.friesQuantity} papas${item.sauce ? ` (${formatSauceSelection(item.sauce)})` : ""}` : null,
+            item.drinkEnabled ? `${item.drinkQuantity} ${item.drink ?? "gaseosa"}` : null,
+          ].filter(Boolean).join(" · ");
+          return <SummaryLine key={item.id} image={getCartItemImage(item)} title={`${item.burgerQuantity} × ${burger.name}`} details={details} notes={item.notes} subtotal={subtotal} onRemove={() => onRemoveItem(item)} removeLabel={burger.name} />;
         })}
       </ol>
 
-      <dl className="mt-6 border-t border-white/10 pt-5">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <dt className="font-dosis text-xs font-bold uppercase tracking-[0.14em] text-[#f59e0b]">
-            Total
-          </dt>
-          <dd className="font-dosis text-3xl font-bold tabular-nums text-white">
-            {cartTotal !== null ? `S/ ${cartTotal.toFixed(2)}` : "Por confirmar"}
-          </dd>
+      <dl className="mx-5 mt-2 space-y-1.5 border-t border-dashed border-white/10 py-4 text-sm lg:mx-6 lg:mt-4">
+        <div className="flex justify-between text-[#8c8278]"><dt>Delivery</dt><dd className="text-[#bca58c]">Se coordina por WhatsApp</dd></div>
+        <div className="flex items-end justify-between pt-1">
+          <dt className="text-xs font-semibold uppercase tracking-[.14em] text-[#a39a8e]">Total</dt>
+          <dd className="font-serif text-4xl leading-none tabular-nums text-white">{cartTotal !== null ? formatMoney(cartTotal) : "Por confirmar"}</dd>
         </div>
       </dl>
     </aside>
   );
 }
 
-function Thumbnail({ src, alt }: { src: string | null; alt: string }) {
-  return <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-[#211711]">{src && <Image src={src} alt={alt} fill sizes="56px" className="object-cover" />}</div>;
+function SummaryLine({ image, title, details, notes, subtotal, onRemove, removeLabel }: { image: string | null; title: string; details: string; notes?: string; subtotal: number | null; onRemove: () => void; removeLabel: string }) {
+  return (
+    <li className="group flex items-start gap-3">
+      <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-[#2a1d15]">{image && <Image src={image} alt="" fill sizes="56px" className="object-cover" />}</div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[.9375rem] font-semibold leading-snug text-[#F3E9D6]">{title}</p>
+        {details && <p className="mt-0.5 text-xs leading-snug text-[#8c8278]">{details}</p>}
+        {notes?.trim() && <p className="mt-0.5 break-words text-xs italic leading-snug text-[#6f665d]">“{notes.trim()}”</p>}
+      </div>
+      <div className="flex shrink-0 flex-col items-end gap-0.5">
+        <span className="text-[.9375rem] font-semibold tabular-nums text-[#F3E9D6]">{subtotal !== null ? formatMoney(subtotal) : "—"}</span>
+        <button type="button" onClick={onRemove} aria-label={`Eliminar ${removeLabel} del carrito`} title="Quitar" className="tap -mr-1.5 grid size-8 place-items-center rounded-full text-[#6f665d] hover:bg-red-500/10 hover:text-[#fca5a5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0793E]">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5" /></svg>
+        </button>
+      </div>
+    </li>
+  );
 }
 
-function ItemActions({ name, subtotal, onRemove }: { name: string; subtotal: number | null; onRemove: () => void }) {
-  return <div className="ml-auto flex shrink-0 flex-col items-end gap-1">
-    <span className="font-dosis font-bold tabular-nums text-white">{subtotal !== null ? `S/ ${subtotal.toFixed(2)}` : "Por confirmar"}</span>
-    <button type="button" onClick={onRemove} aria-label={`Eliminar ${name} del carrito`} title="Eliminar" className="grid size-10 place-items-center rounded-full text-[#a1a1aa] transition-colors hover:bg-red-500/10 hover:text-[#fb7185] active:bg-red-500/20 active:text-[#fda4af] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]">
-      <svg aria-hidden="true" viewBox="0 0 24 24" className="size-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="m6 7 1 13h10l1-13"/><path d="M10 11v5M14 11v5"/></svg>
-    </button>
-  </div>;
+function formatMoney(value: number) {
+  return `S/ ${Number.isInteger(value) ? value.toFixed(0) : value.toFixed(2)}`;
 }

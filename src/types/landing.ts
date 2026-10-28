@@ -1,4 +1,4 @@
-export type ProductCategory = "all" | "burgers" | "empanadas" | "sides" | "drinks";
+export type ProductCategory = "all" | "burgers" | "sides" | "drinks";
 
 export interface CategoryOption {
   id: ProductCategory;
@@ -9,7 +9,7 @@ export interface CategoryOption {
 export interface ProductItem {
   id: string;
   name: string;
-  category: "burgers" | "empanadas" | "sides" | "drinks";
+  category: "burgers" | "sides" | "drinks";
   price: number | null;
   description: string;
   image: string;
@@ -40,7 +40,7 @@ export interface OrderDraft {
   notes: string;
 }
 
-export type SauceName = "Ranchera" | "Tártara";
+export type SauceName = "Ranchera" | "Tártara" | "Mayo Golf";
 export type SauceSelection = SauceName[] | "Ninguna" | null;
 export type DrinkSelection = "Coca-Cola" | "Inca Kola" | null;
 

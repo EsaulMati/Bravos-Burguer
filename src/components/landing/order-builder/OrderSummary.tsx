@@ -19,11 +19,11 @@ export function OrderSummary({
     <div
       id="resumen-orden"
       tabIndex={-1}
-      className="rounded-2xl border border-white/5 bg-[#101012] p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] sm:p-5"
+      className="rounded-2xl border border-white/5 bg-[#1D1713] p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0793E] sm:p-5"
     >
       <div className="mb-4 flex items-center justify-between gap-4">
         <h4 className="font-serif text-xl font-bold text-white">Tu orden</h4>
-        <span className="font-dosis text-xs font-bold uppercase tracking-[0.14em] text-[#f59e0b]">
+        <span className="font-dosis text-xs font-bold uppercase tracking-[0.14em] text-[#E0793E]">
           Borrador local
         </span>
       </div>
@@ -39,7 +39,7 @@ export function OrderSummary({
       </ul>
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-3 border-t border-white/10 pt-4">
-        <span className="font-dosis text-xs font-bold uppercase tracking-[0.14em] text-[#a1a1aa]">
+        <span className="font-dosis text-xs font-bold uppercase tracking-[0.14em] text-[#A39A8E]">
           Total
         </span>
         <output
@@ -57,10 +57,10 @@ export function OrderSummary({
 function SummaryLine({ quantity, name }: { quantity: number; name: string }) {
   return (
     <li className="flex min-w-0 items-baseline gap-3 text-sm">
-      <span className="shrink-0 font-dosis font-bold tabular-nums text-[#f97316]">
+      <span className="shrink-0 font-dosis font-bold tabular-nums text-[#E0793E]">
         {quantity} ×
       </span>
-      <span className="min-w-0 text-[#d4d4d8]">{name}</span>
+      <span className="min-w-0 text-[#E2D8C6]">{name}</span>
     </li>
   );
 }

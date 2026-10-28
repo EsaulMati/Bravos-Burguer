@@ -2,27 +2,28 @@ import type { Metadata } from "next";
 import { FooterSimple } from "@/src/components/landing/FooterSimple";
 import { Navbar } from "@/src/components/landing/Navbar";
 import { MenuCatalogExperience } from "@/src/components/menu/MenuCatalogExperience";
+import { SHARE_IMAGE } from "@/src/data/seo";
 
 export const metadata: Metadata = {
-  title: "Menú Bravos | Bravos Burger",
-  description: "El menú completo de Bravos Burger: hamburguesas, combos y empanadas.",
+  title: { absolute: "Menú de hamburguesas y precios en Arequipa | Bravos" },
+  description: "La Gordita desde S/ 20, El León con doble carne desde S/ 25, combos Ya Pagaron para la manchita, papas y gaseosas. Arma tu pedido y envíalo por WhatsApp.",
+  alternates: { canonical: "/menu" },
+  openGraph: { url: "/menu", title: "Menú de hamburguesas y precios en Arequipa | Bravos", images: [SHARE_IMAGE] },
+  twitter: { card: "summary_large_image", images: [SHARE_IMAGE.url] },
 };
 
 export default function MenuPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#130d09]">
+    <div className="flex min-h-screen flex-col bg-[#16110E]">
       <Navbar />
       <main className="flex-1">
-        <header className="menu-page-hero px-4 pb-9 pt-24 sm:px-6 sm:pb-12 sm:pt-28">
+        <header className="menu-page-hero px-4 pb-10 pt-28 sm:px-6 sm:pb-14 sm:pt-32">
           <div className="mx-auto max-w-6xl">
-            <p className="font-dosis text-xs font-bold uppercase tracking-[0.34em] text-[#d99a5b]">
-              Premium Grill &amp; Smoke
-            </p>
-            <h1 className="mt-4 font-serif text-5xl font-bold leading-none text-[#f6eadb] sm:text-7xl">
-              Menú Bravos
+            <h1 className="font-brush text-[3.25rem] leading-[1] text-[#F3E9D6] sm:text-7xl lg:text-8xl">
+              El menú
             </h1>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#c8b39d] sm:text-base">
-              Los de la casa, sus yapas y todo lo que prende la mesa.
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-[#d9cdb9] sm:text-lg">
+              Hamburguesas a la plancha, combos para compartir y sus yapas. Precios en soles. Pides por WhatsApp y pagas con Yape o Plin.
             </p>
           </div>
         </header>

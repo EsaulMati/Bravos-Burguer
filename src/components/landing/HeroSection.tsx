@@ -1,36 +1,83 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import Link from "next/link";
+import { useCallback, useRef } from "react";
+import { useScrollFrames, type FrameSet } from "@/src/hooks/useScrollFrames";
 
-const slides = [
-  { title: "Fuego, plancha caliente y sabor contundente", copy: "Cada hamburguesa nace del fuego exacto y la pasión por la cocina artesanal." },
-  { title: "Hamburguesas con carácter real", copy: "Carne jugosa sellada al instante, queso fundido y pan tostado en su punto." },
-  { title: "Tu orden, como a ti te gusta", copy: "Elige tu burger, suma papas y una cola helada." },
-];
+// Despiece de El León (public/hero): 60 cuadros por versión; el 000 es la hamburguesa armada.
+const FRAME_COUNT = 60;
+const frameSrc = (set: FrameSet, index: number) => `/hero/${set}/${String(index).padStart(3, "0")}.webp`;
 
 export function HeroSection() {
-  const [phase, setPhase] = useState(0);
-  const reduce = useReducedMotion();
-  useEffect(() => { if (reduce) return; const timer = window.setInterval(() => setPhase((value) => (value + 1) % slides.length), 8000); return () => window.clearInterval(timer); }, [reduce]);
-  const slide = slides[phase];
+  const sectionRef = useRef<HTMLElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const cueRef = useRef<HTMLDivElement>(null);
+
+  // El CSS lee --p para el sello y el aviso de bajar; así el scroll no vuelve a renderizar React.
+  const onProgress = useCallback((p: number) => {
+    sectionRef.current?.style.setProperty("--p", p.toFixed(3));
+    if (cueRef.current) cueRef.current.style.opacity = String(Math.max(0, 1 - p * 6));
+  }, []);
+  // Con movimiento reducido el canvas se oculta y queda la foto del primer cuadro.
+  useScrollFrames({ sectionRef, canvasRef, count: FRAME_COUNT, src: frameSrc, stillIndex: null, onProgress });
+
   return (
-    <section id="inicio" className="relative flex h-[100svh] min-h-[36rem] items-end overflow-hidden bg-[#15100c] md:min-h-[42rem] md:items-center">
-      <video autoPlay loop muted playsInline preload="auto" aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center">
-        <source src="/bravos-mobile-hero.mp4.mp4" media="(max-width: 767px)" type="video/mp4" />
-        <source src="/bravos-hero.mp4" type="video/mp4" />
-      </video>
-      <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(180deg,rgba(12,8,6,.08)_16%,rgba(12,8,6,.12)_52%,rgba(12,8,6,.72)_100%)] md:bg-[linear-gradient(90deg,rgba(12,8,6,.55)_0%,rgba(12,8,6,.18)_42%,transparent_72%)]" />
-      <div className="relative z-20 mx-auto w-full max-w-7xl px-5 pb-[12vh] pt-24 sm:px-8 md:pb-0 lg:px-12">
-        <div className="flex min-h-64 max-w-[20rem] items-end md:min-h-80 md:max-w-2xl md:items-center">
-          <AnimatePresence mode="wait" initial={false}><motion.div key={phase} initial={false} animate={{ opacity: 1, y: 0 }} exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }} transition={{ duration: reduce ? 0 : .65, ease: "easeOut" }}>
-            <h1 className="text-balance font-serif text-[2.15rem] font-bold leading-[.98] tracking-[-.025em] text-[#fff5e4] sm:text-5xl md:text-6xl lg:text-[5.5rem]">{slide.title}</h1>
-            <p className="mt-4 max-w-[19rem] text-[.82rem] leading-relaxed text-[#f0dfc8] md:mt-6 md:max-w-lg md:text-base">{slide.copy}</p>
-            <a href="#menu" className="mt-5 inline-flex min-h-11 items-center rounded-full bg-[#bd5a22] px-5 font-dosis text-base font-bold text-white transition-colors hover:bg-[#dc7130] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb36e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#24150d] md:mt-8 md:min-h-12 md:px-7 md:text-lg">Ver menú y precios</a>
-          </motion.div></AnimatePresence>
+    <section ref={sectionRef} id="inicio" className="bravos-hero">
+      <div className="bravos-hero-sticky">
+        <div aria-hidden="true" className="bravos-hero-media">
+          <div className="bravos-hero-frame absolute inset-0">
+            <picture>
+              <source media="(max-width: 767px), (max-aspect-ratio: 1/1)" srcSet={frameSrc("cel", 0)} />
+              {/* Primer cuadro de la secuencia; el canvas dibuja encima los siguientes. */}
+              <img src={frameSrc("web", 0)} alt="" fetchPriority="high" decoding="async" className="absolute inset-0 h-full w-full" />
+            </picture>
+            <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+          </div>
+          {/* Sello: aparece y se encierra en un trazo a mano mientras El León se abre. */}
+          <div className="bravos-hero-stamp">
+            <svg viewBox="0 0 200 200" fill="none" className="absolute inset-0 h-full w-full overflow-visible">
+              <path pathLength={1} d="M150 30C118 6 52 12 26 58S20 162 84 180s132-14 102-104C172 38 126 22 92 26" />
+            </svg>
+            <span className="font-dosis text-[.6875rem] font-bold uppercase tracking-[.12em] text-[#E0793E]">El de la casa</span>
+            <span className="font-brush text-[1.4em] leading-none text-[#F3E9D6]">El León</span>
+          </div>
+        </div>
+        <div aria-hidden="true" className="bravos-hero-shade pointer-events-none absolute inset-0" />
+        <div className="bravos-hero-content">
+          <h1 className="bravos-hero-title text-[#F3E9D6]">
+            <span className="block font-dosis text-[1.05rem] font-bold leading-tight text-[#E0793E] drop-shadow-[0_2px_10px_rgba(0,0,0,.85)] md:text-xl">Delivery en Arequipa</span>
+            <span className="mt-2 block text-balance font-brush text-[2.3rem] leading-[1.08] drop-shadow-[0_4px_24px_rgba(0,0,0,.6)] sm:text-[3.25rem] md:text-[3.75rem] lg:text-[4.25rem]">
+              Hamburguesas{" "}
+              {/* La coma va pegada a "bravas" para que no salte sola a la línea siguiente. */}
+              <span className="whitespace-nowrap">
+                <span className="bravos-hero-mark">
+                  bravas
+                  <svg aria-hidden="true" viewBox="0 0 300 24" preserveAspectRatio="none" fill="none">
+                    <path pathLength={1} d="M4 15C70 6 160 4 296 9M24 20c86-6 170-7 252-3" />
+                  </svg>
+                </span>
+                ,
+              </span>{" "}
+              directo a tu puerta
+            </span>
+          </h1>
+          <div className="bravos-hero-actions">
+            <p className="max-w-[22rem] text-[.9375rem] leading-relaxed text-[#f0dfc8] drop-shadow-[0_2px_12px_rgba(0,0,0,.8)] md:max-w-md md:text-lg">
+              La Gordita y El León, con doble carne, recién salidos de la plancha. Armas tu pedido aquí, lo mandas por WhatsApp y pagas con Yape o Plin.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-3 md:mt-8">
+              <a href="#armar-orden" className="bravos-button tap">Armar mi pedido</a>
+              <Link href="/menu" className="bravos-button bravos-button--ghost tap">Ver menú y precios</Link>
+            </div>
+          </div>
+        </div>
+        <div ref={cueRef} aria-hidden="true" className="bravos-hero-cue">
+          <span>Baja y mira cómo se arma</span>
+          <svg viewBox="0 0 140 48" fill="none">
+            <path pathLength={1} d="M4 40C34 44 72 40 98 26S126 6 132 4M114 4l18 0-6 16" />
+          </svg>
         </div>
       </div>
-      <a href="#menu" aria-label="Ir al menú" className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full p-3 text-[#f2d3aa] transition-transform hover:translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2b06d]"><svg aria-hidden="true" viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="m6 9 6 6 6-6" /></svg></a>
     </section>
   );
 }

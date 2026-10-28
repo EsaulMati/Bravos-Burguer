@@ -1,6 +1,6 @@
-# Bravos Burger
+# Bravos Grill & Smoke
 
-Sitio web de Bravos Burger para explorar el menú, armar órdenes y preparar un pedido para enviarlo por WhatsApp. Toda la experiencia comercial funciona localmente en el navegador.
+Sitio web de Bravos Grill & Smoke para explorar el menú, armar órdenes y preparar un pedido para enviarlo por WhatsApp. Toda la experiencia comercial funciona localmente en el navegador.
 
 ## Stack
 
@@ -9,7 +9,8 @@ Sitio web de Bravos Burger para explorar el menú, armar órdenes y preparar un 
 - Tailwind CSS 4.
 - Motion para transiciones puntuales de la experiencia visual.
 - `next/image` y `next/font` para optimización de imágenes y tipografías.
-- Fuentes Rasa, Montserrat Alternates y Dosis.
+- Fuentes Knewave (titulares grandes, estilo brocha, clase `font-brush`), Anton (nombres de productos y precios, clase `font-serif`), Rubik (textos y botones) y Barlow Condensed (etiquetas).
+- Logo oficial y variantes en `public/brand/` (escudo Bravos Grill & Smoke).
 
 El gestor de paquetes del proyecto es npm (`package-lock.json`).
 
@@ -69,9 +70,9 @@ Los datos recuperados se validan y un JSON inválido se descarta sin bloquear la
 
 ## Configuración de WhatsApp
 
-El número se centraliza en `src/data/contact.ts`. Actualmente `BRAVOS_WHATSAPP_NUMBER` permanece vacío de forma deliberada, por lo que el botón de envío está deshabilitado. No se debe inventar ni publicar un número hasta recibir el contacto real de Bravos.
+El número se centraliza en `src/data/contact.ts` (`BRAVOS_WHATSAPP_NUMBER`).
 
-Abrir WhatsApp no registra ni confirma la recepción de un pedido y tampoco limpia el carrito.
+Abrir WhatsApp no registra ni confirma la recepción de un pedido, así que no limpia el carrito. Después de abrir WhatsApp el checkout muestra "¿Ya nos llegó tu pedido?": el carrito solo se vacía cuando el cliente toca "Ya lo envié". Mientras tanto puede volver a abrir WhatsApp con el mismo mensaje. Ese estado se guarda en `sessionStorage` (`bravos-order-sent-v1`) y se descarta si cambia el carrito o los datos.
 
 ## Restricciones del proyecto
 
@@ -79,8 +80,9 @@ Abrir WhatsApp no registra ni confirma la recepción de un pedido y tampoco limp
 - No hay panel administrativo, cuentas ni autenticación.
 - No hay gestión de delivery desde esta web.
 - No hay cobros automáticos, QR, pasarela de pago ni integración con SUNAT.
-- El hero, su video, sus textos sincronizados y su comportamiento se consideran piezas protegidas y no deben modificarse sin una solicitud explícita.
+- El hero muestra el despiece de El León movido por el scroll: 60 cuadros WebP en `public/hero/web` (computadora) y `public/hero/cel` (celular), sacados de los videos aprobados en `D:\bravos\hero-prueba\v4`. El primer cuadro es la foto real de la hamburguesa y no debe reemplazarse sin una solicitud explícita. Con movimiento reducido se queda la foto fija.
+- La sección de la plancha usa la misma técnica (`src/hooks/useScrollFrames.ts`): 60 cuadros en `public/plancha/web` y `public/plancha/cel`, sacados de los videos en `D:\bravos\plancha-video`. La carne pasa de cruda a sellada con queso y el termómetro sube de 25 a 160 °C. Los cuadros se descargan recién cuando la sección se acerca.
 
 ## Publicación pendiente
 
-Antes de publicar deben definirse el dominio canónico, la imagen Open Graph y el número real de WhatsApp. No se configuraron URLs ni datos ficticios.
+Dominio canónico: https://bravossburguer.pro. Imagen para compartir: `public/og-bravos.jpg`. Pendiente del dueño: horario, zonas y costo de delivery, para mostrarlos en la web y en la ficha de Google (`app/page.tsx`).

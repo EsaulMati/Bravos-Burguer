@@ -1,5 +1,5 @@
 import { ADDITIONAL_PRODUCTS, BURGERS_DATA, MENU_PRODUCTS, ORDER_PRICE_MATRIX } from "@/src/data/featured-products";
-import type { BuilderCartItem, Cart, CartItem, CatalogCartItem, OrderDraft } from "@/src/types/landing";
+import type { BuilderCartItem, Cart, CartItem, CatalogCartItem, OrderDraft, SauceName } from "@/src/types/landing";
 
 export const CART_STORAGE_KEY = "bravos-cart-v1";
 export const CART_QUANTITY_LIMIT = 10;
@@ -150,16 +150,19 @@ function normalizeOrderDraft(value: unknown): OrderDraft | null {
   };
 }
 
+/** Salsas para las papas, en el orden en que se muestran y se escriben en el pedido. */
+export const SAUCES: readonly SauceName[] = ["Ranchera", "Tártara", "Mayo Golf"];
+
 function normalizeSauce(value: unknown): CatalogCartItem["sauce"] {
   if (value === "Ninguna") return value;
-  if (value === "Ranchera" || value === "Tártara") return [value];
+  if (typeof value === "string" && (SAUCES as readonly string[]).includes(value)) return [value as SauceName];
   if (!Array.isArray(value)) return null;
-  const sauces = (["Ranchera", "Tártara"] as const).filter((sauce) => value.includes(sauce));
+  const sauces = SAUCES.filter((sauce) => value.includes(sauce));
   return sauces.length > 0 ? sauces : null;
 }
 
 export function formatSauceSelection(value: CatalogCartItem["sauce"]): string | null {
-  if (value === "Ninguna") return value;
+  if (value === "Ninguna") return "Sin salsa";
   return Array.isArray(value) && value.length > 0 ? value.join(" + ") : null;
 }
 
