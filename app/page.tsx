@@ -39,7 +39,7 @@ const restaurantJsonLd = {
     { "@type": "OpeningHoursSpecification", dayOfWeek: ["Thursday", "Friday", "Saturday", "Sunday"], opens: "16:30", closes: "01:00" },
   ],
   currenciesAccepted: "PEN",
-  sameAs: ["https://www.instagram.com/bravosgrillsmoke"],
+  sameAs: ["https://www.instagram.com/bravosgrillsmoke", "https://www.tiktok.com/@bravossburguer", "https://www.facebook.com/bravossburguer"],
 };
 
 export default function Home() {

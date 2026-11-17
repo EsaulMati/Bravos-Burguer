@@ -3,7 +3,11 @@ import Link from "next/link";
 import { BRAVOS_WHATSAPP_NUMBER } from "@/src/data/contact";
 import { SCHEDULE_SUMMARY } from "@/src/lib/schedule";
 
-const INSTAGRAM_URL = "https://www.instagram.com/bravosgrillsmoke";
+const SOCIAL_LINKS = [
+  { href: "https://www.instagram.com/bravosgrillsmoke", label: "Instagram", handle: "@bravosgrillsmoke", Icon: InstagramIcon },
+  { href: "https://www.tiktok.com/@bravossburguer", label: "TikTok", handle: "@bravossburguer", Icon: TikTokIcon },
+  { href: "https://www.facebook.com/bravossburguer", label: "Facebook", handle: "bravossburguer", Icon: FacebookIcon },
+];
 const WHATSAPP_URL = `https://wa.me/${BRAVOS_WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Bravos, quiero hacer un pedido")}`;
 
 export function FooterSimple() {
@@ -51,15 +55,15 @@ export function FooterSimple() {
 
           <div className="lg:order-4">
             <h3 className="font-dosis text-base font-semibold text-[var(--bravos-fire)]">Social</h3>
-            <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram de Bravos"
-              className="bravos-footer-link mt-2 text-sm"
-            >
-              <InstagramIcon /> @bravosgrillsmoke <span aria-hidden="true">↗</span>
-            </a>
+            <ul className="mt-2 space-y-1 text-sm">
+              {SOCIAL_LINKS.map(({ href, label, handle, Icon }) => (
+                <li key={label}>
+                  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`${label} de Bravos`} className="bravos-footer-link">
+                    <Icon /> {handle} <span aria-hidden="true">↗</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
@@ -79,6 +83,23 @@ function InstagramIcon() {
       <rect x="3" y="3" width="18" height="18" rx="5" />
       <circle cx="12" cy="12" r="4" />
       <circle cx="17.4" cy="6.8" r=".8" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function TikTokIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5" />
+      <path d="M14 3c.4 2.6 2.2 4.4 5 4.6" />
+    </svg>
+  );
+}
+
+function FacebookIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.5V4.4a20 20 0 0 0-2.3-.1c-2.3 0-3.8 1.4-3.8 3.9v2.3H9v3h2.5V21" />
     </svg>
   );
 }
