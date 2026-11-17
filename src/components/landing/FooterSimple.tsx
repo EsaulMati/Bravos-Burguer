@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BRAVOS_WHATSAPP_NUMBER } from "@/src/data/contact";
+import { SCHEDULE_SUMMARY } from "@/src/lib/schedule";
 
 const INSTAGRAM_URL = "https://www.instagram.com/bravosgrillsmoke";
 const WHATSAPP_URL = `https://wa.me/${BRAVOS_WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Bravos, quiero hacer un pedido")}`;
@@ -11,9 +12,9 @@ export function FooterSimple() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-14 border-b border-[rgba(243,233,214,.15)] pb-14 sm:mb-16 sm:pb-16">
           <h2 className="font-brush text-[clamp(2.75rem,9vw,7rem)] leading-[1] text-[var(--bravos-cream)]">La plancha está lista</h2>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-[#d9cdb9] sm:text-lg">Arma tu pedido y nos llega por WhatsApp. Pagas con Yape o Plin.</p>
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-[#d9cdb9] sm:text-lg">Elige tu burger en el menú y nos llega por WhatsApp. Pagas con Yape o Plin.</p>
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/#armar-orden" className="bravos-button tap">Armar mi pedido</Link>
+            <Link href="/menu" className="bravos-button tap">Ver el menú</Link>
           </div>
         </div>
         <div className="grid gap-7 md:grid-cols-2 md:gap-10 lg:grid-cols-[1.4fr_1fr_1fr_.8fr]">
@@ -32,10 +33,11 @@ export function FooterSimple() {
           </div>
 
           <div className="lg:order-3">
-            <h3 className="font-dosis text-base font-semibold text-[var(--bravos-fire)]">Pedidos</h3>
-            <ul className="mt-2 text-sm">
-              <li><a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="bravos-footer-link">WhatsApp <span aria-hidden="true">↗</span></a></li>
-            </ul>
+            <h3 className="font-dosis text-base font-semibold text-[var(--bravos-fire)]">Horario</h3>
+            <dl className="mt-2 space-y-1.5 text-sm text-[#d9cdb9]">
+              {SCHEDULE_SUMMARY.map((row) => <div key={row.days}><dt className="text-[#a39a8e]">{row.days}</dt><dd>{row.hours}</dd></div>)}
+            </dl>
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="bravos-footer-link mt-3 text-sm">Pedidos por WhatsApp <span aria-hidden="true">↗</span></a>
           </div>
 
           <nav aria-label="Navegación del pie de página" className="lg:order-2">
@@ -43,8 +45,7 @@ export function FooterSimple() {
             <ul className="mt-2 grid grid-cols-2 gap-x-4 text-sm md:grid-cols-1">
               <li><Link href="/#inicio" className="bravos-footer-link">Inicio</Link></li>
               <li><Link href="/menu" className="bravos-footer-link">Menú</Link></li>
-              <li><Link href="/#combos" className="bravos-footer-link">Para la Manchita</Link></li>
-              <li><Link href="/#armar-orden" className="bravos-footer-link">Arma tu pedido</Link></li>
+              <li><Link href="/privacidad" className="bravos-footer-link">Privacidad</Link></li>
             </ul>
           </nav>
 

@@ -11,12 +11,10 @@ const frameSrc = (set: FrameSet, index: number) => `/hero/${set}/${String(index)
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const cueRef = useRef<HTMLDivElement>(null);
 
-  // El CSS lee --p para el sello y el aviso de bajar; así el scroll no vuelve a renderizar React.
+  // El CSS lee --p para el sello; así el scroll no vuelve a renderizar React.
   const onProgress = useCallback((p: number) => {
     sectionRef.current?.style.setProperty("--p", p.toFixed(3));
-    if (cueRef.current) cueRef.current.style.opacity = String(Math.max(0, 1 - p * 6));
   }, []);
   // Con movimiento reducido el canvas se oculta y queda la foto del primer cuadro.
   useScrollFrames({ sectionRef, canvasRef, count: FRAME_COUNT, src: frameSrc, stillIndex: null, onProgress });
@@ -63,19 +61,12 @@ export function HeroSection() {
           </h1>
           <div className="bravos-hero-actions">
             <p className="max-w-[22rem] text-[.9375rem] leading-relaxed text-[#f0dfc8] drop-shadow-[0_2px_12px_rgba(0,0,0,.8)] md:max-w-md md:text-lg">
-              El León con doble carne y La Gordita, recién salidos de la plancha. Armas tu pedido aquí, lo mandas por WhatsApp y pagas con Yape o Plin.
+              El León con doble carne y La Gordita, recién salidos de la plancha. Eliges tu burger en el menú, mandas el pedido por WhatsApp y pagas con Yape o Plin.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-3 md:mt-8">
-              <a href="#armar-orden" className="bravos-button tap">Armar mi pedido</a>
-              <Link href="/menu" className="bravos-button bravos-button--ghost tap">Ver menú y precios</Link>
+              <Link href="/menu" className="bravos-button tap">Ver el menú y pedir</Link>
             </div>
           </div>
-        </div>
-        <div ref={cueRef} aria-hidden="true" className="bravos-hero-cue">
-          <span>Baja y mira cómo se arma</span>
-          <svg viewBox="0 0 140 48" fill="none">
-            <path pathLength={1} d="M4 40C34 44 72 40 98 26S126 6 132 4M114 4l18 0-6 16" />
-          </svg>
         </div>
       </div>
     </section>

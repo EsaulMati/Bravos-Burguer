@@ -2,36 +2,35 @@
 
 import { useEffect, useRef, useState } from "react";
 import { BRAVOS_WHATSAPP_COUNTRY_CODE, BRAVOS_WHATSAPP_NUMBER } from "@/src/data/contact";
-import { CHECKOUT_STORAGE_KEY, INITIAL_CHECKOUT_DRAFT, normalizeCheckout, normalizePeruvianPhone, serializeCheckout, validateCheckout } from "@/src/lib/checkout";
+import { CHECKOUT_STORAGE_KEY, INITIAL_CHECKOUT_DRAFT, buildMapsUrl, normalizeCheckout, normalizePeruvianPhone, serializeCheckout, validateCheckout } from "@/src/lib/checkout";
+import { createOrderCode, getStoreStatus } from "@/src/lib/schedule";
+import { StoreStatusBadge } from "@/src/components/StoreStatusBadge";
+import { useStoreStatus } from "@/src/hooks/useStoreStatus";
+import Link from "next/link";
 import { buildOrderMessage, buildWhatsAppUrl, normalizeWhatsAppNumber } from "@/src/lib/order-message";
-import { calculateCartTotal, isCatalogCartItem } from "@/src/lib/cart";
+import { CART_STORAGE_KEY, calculateCartTotal, isCatalogCartItem } from "@/src/lib/cart";
 import type { CartItem, CheckoutDraft, CheckoutErrors, PaymentMethod } from "@/src/types/landing";
 import { CheckoutSummary } from "./CheckoutSummary";
 import { Toast, useToast } from "@/src/components/feedback/Toast";
 import { BURGERS_DATA } from "@/src/data/featured-products";
 import { removedFromCartMessage } from "@/src/lib/cart-copy";
 
-/** URL de WhatsApp ya abierta; el carrito solo se vacía cuando el cliente confirma que envió. */
-const ORDER_SENT_STORAGE_KEY = "bravos-order-sent-v1";
-
-export function CheckoutSection({ items, onOpenCart, onRemoveItem, onOrderConfirmed }: { items: CartItem[]; onOpenCart: () => void; onRemoveItem: (id: string) => void; onOrderConfirmed: () => void }) {
+export function CheckoutSection({ items, onOpenCart, onRemoveItem }: { items: CartItem[]; onOpenCart: () => void; onRemoveItem: (id: string) => void }) {
   const [draft, setDraft] = useState<CheckoutDraft>(INITIAL_CHECKOUT_DRAFT);
   const [errors, setErrors] = useState<CheckoutErrors>({});
   const [isHydrated, setIsHydrated] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [isConfirming, setIsConfirming] = useState(false);
   const [transactionActive, setTransactionActive] = useState(false);
-  const [sentUrl, setSentUrl] = useState<string | null>(null);
   const confirmingRef = useRef(false);
   const transitionTimerRef = useRef<number | null>(null);
-  const pendingWindowRef = useRef<Window | null>(null);
   const pendingUrlRef = useRef<string | null>(null);
-  const pendingNavigationModeRef = useRef<"mobile" | "desktop" | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const number = normalizeWhatsAppNumber(BRAVOS_WHATSAPP_NUMBER, BRAVOS_WHATSAPP_COUNTRY_CODE);
   const { toast, showToast } = useToast();
+  const storeStatus = useStoreStatus();
 
-  useEffect(() => { const timer = window.setTimeout(() => { try { const stored = window.localStorage.getItem(CHECKOUT_STORAGE_KEY); setDraft(stored ? normalizeCheckout(JSON.parse(stored)) : INITIAL_CHECKOUT_DRAFT); } catch { setDraft(INITIAL_CHECKOUT_DRAFT); } try { setSentUrl(window.sessionStorage.getItem(ORDER_SENT_STORAGE_KEY)); } catch { /* sin sessionStorage */ } setIsHydrated(true); }, 0); return () => window.clearTimeout(timer); }, []);
+  useEffect(() => { const timer = window.setTimeout(() => { try { const stored = window.localStorage.getItem(CHECKOUT_STORAGE_KEY); setDraft(stored ? normalizeCheckout(JSON.parse(stored)) : INITIAL_CHECKOUT_DRAFT); } catch { setDraft(INITIAL_CHECKOUT_DRAFT); } setIsHydrated(true); }, 0); return () => window.clearTimeout(timer); }, []);
   useEffect(() => { if (!isHydrated) return; try { window.localStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(serializeCheckout(draft))); } catch { /* memoria */ } }, [draft, isHydrated]);
   useEffect(() => {
     if (!isConfirming) return;
@@ -40,67 +39,33 @@ export function CheckoutSection({ items, onOpenCart, onRemoveItem, onOrderConfir
     overlayRef.current?.focus();
     return () => { document.body.style.overflow = previousOverflow; };
   }, [isConfirming]);
+  // Primero se ve la animación completa (tarjeta, POS y check) y recién después se abre WhatsApp en esta misma pestaña.
+  // El pedido ya va escrito en WhatsApp, así que el carrito se vacía: si el cliente vuelve atrás, empieza de cero.
   useEffect(() => {
     if (!isConfirming) return;
-    let secondFrame = 0;
-    const firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(() => {
-        setTransactionActive(true);
-        transitionTimerRef.current = window.setTimeout(() => {
-          transitionTimerRef.current = null;
-          const whatsappWindow = pendingWindowRef.current;
-          const url = pendingUrlRef.current;
-          const navigationMode = pendingNavigationModeRef.current;
-          if (!url || !navigationMode || (navigationMode === "desktop" && (!whatsappWindow || whatsappWindow.closed))) {
-            confirmingRef.current = false;
-            pendingWindowRef.current = null;
-            pendingUrlRef.current = null;
-            pendingNavigationModeRef.current = null;
-            setTransactionActive(false);
-            setIsConfirming(false);
-            setFeedback(navigationMode === "desktop" ? "La ventana de WhatsApp se cerró antes de enviar el pedido. Tu carrito sigue guardado." : "No pudimos iniciar WhatsApp. Tu carrito sigue guardado.");
-            return;
-          }
-          try {
-            if (navigationMode === "mobile") {
-              window.location.assign(url);
-            } else {
-              whatsappWindow!.location.href = url;
-            }
-            pendingWindowRef.current = null;
-            pendingUrlRef.current = null;
-            pendingNavigationModeRef.current = null;
-            // No vaciamos el carrito: WhatsApp solo se abrió, el cliente aún tiene que darle enviar.
-            setSentUrl(url);
-            try { window.sessionStorage.setItem(ORDER_SENT_STORAGE_KEY, url); } catch { /* sin sessionStorage */ }
-          } catch {
-            pendingWindowRef.current = null;
-            pendingUrlRef.current = null;
-            pendingNavigationModeRef.current = null;
-            setFeedback("No pudimos abrir WhatsApp. Tu carrito sigue guardado.");
-          } finally {
-            confirmingRef.current = false;
-            setTransactionActive(false);
-            setIsConfirming(false);
-          }
-        }, 1500);
-      });
-    });
-    return () => {
-      window.cancelAnimationFrame(firstFrame);
-      if (secondFrame) window.cancelAnimationFrame(secondFrame);
-    };
+    // Un respiro para que la tarjeta se pinte en su estado inicial y luego arranca la animación.
+    const startTimer = window.setTimeout(() => setTransactionActive(true), 60);
+    transitionTimerRef.current = window.setTimeout(() => {
+      transitionTimerRef.current = null;
+      const url = pendingUrlRef.current;
+      pendingUrlRef.current = null;
+      const stop = (message: string) => { confirmingRef.current = false; setTransactionActive(false); setIsConfirming(false); setFeedback(message); };
+      if (!url) { stop("No pudimos iniciar WhatsApp. Tu carrito sigue guardado."); return; }
+      try {
+        // Se vacía en el almacenamiento y no en React: así esta página no redirige a la portada mientras abre WhatsApp.
+        // Al volver, el carrito se lee de nuevo y ya está vacío. La animación queda en pantalla hasta que WhatsApp carga.
+        try { window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items: [], updatedAt: Date.now() })); } catch { /* sin almacenamiento */ }
+        window.location.assign(url);
+      } catch {
+        stop("No pudimos abrir WhatsApp. Inténtalo otra vez.");
+      }
+    }, TRANSACTION_DURATION_MS);
+    return () => window.clearTimeout(startTimer);
   }, [isConfirming]);
   useEffect(() => () => {
     if (transitionTimerRef.current !== null) window.clearTimeout(transitionTimerRef.current);
-    if (pendingWindowRef.current && !pendingWindowRef.current.closed) pendingWindowRef.current.close();
   }, []);
 
-  const forgetSentOrder = () => { setSentUrl(null); try { window.sessionStorage.removeItem(ORDER_SENT_STORAGE_KEY); } catch { /* sin sessionStorage */ } };
-  const confirmOrderSent = () => { forgetSentOrder(); onOrderConfirmed(); };
-  // Si el carrito o los datos cambiaron después de abrir WhatsApp, ese mensaje ya no corresponde.
-  const currentUrl = number && isHydrated ? buildWhatsAppUrl(number, buildOrderMessage({ items }, draft)) : null;
-  const showSentPanel = sentUrl !== null && sentUrl === currentUrl && !isConfirming;
   const updateDraft = (changes: Partial<CheckoutDraft>) => { setDraft((current) => ({ ...current, ...changes })); setFeedback(""); setErrors((current) => { const next = { ...current }; Object.keys(changes).forEach((key) => delete next[key as keyof CheckoutDraft]); return next; }); };
   const removeCheckoutItem = (item: CartItem) => {
     const name = isCatalogCartItem(item)
@@ -116,20 +81,14 @@ export function CheckoutSection({ items, onOpenCart, onRemoveItem, onOrderConfir
     const validation = validateCheckout(draft); setErrors(validation); setFeedback("");
     const firstError = Object.keys(validation)[0] as keyof CheckoutDraft | undefined;
     if (firstError) { showToast("Completa los datos de tu pedido", "error"); (firstError === "paymentMethod" ? document.querySelector<HTMLInputElement>('input[name="payment"]') : document.getElementById(`checkout-${firstError}`))?.focus(); return; }
-    const normalizedDraft = { ...draft, customerName: draft.customerName.trim(), phone: normalizePeruvianPhone(draft.phone) };
-    const url = number ? buildWhatsAppUrl(number, buildOrderMessage({ items }, normalizedDraft)) : null;
+    const normalizedDraft = { ...draft, customerName: draft.customerName.trim(), phone: normalizePeruvianPhone(draft.phone), address: draft.address.trim(), reference: draft.reference.trim() };
+    // Fuera de horario el pedido igual se envía: el mensaje avisa a la cocina que se atiende al abrir.
+    // La hora se revisa al enviar, no al cargar: alguien puede dejar la página abierta hasta después del cierre.
+    const store = getStoreStatus();
+    const url = number ? buildWhatsAppUrl(number, buildOrderMessage({ items }, normalizedDraft, { ...createOrderCode(), reopens: store.open ? undefined : store.reopens })) : null;
     if (!url) { setFeedback("No pudimos preparar tu pedido para WhatsApp."); return; }
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile) {
-      const whatsappWindow = window.open("", "_blank");
-      if (!whatsappWindow) { setFeedback("No pudimos abrir WhatsApp. Permite las ventanas emergentes e inténtalo nuevamente."); return; }
-      renderWhatsAppTransition(whatsappWindow);
-      try { whatsappWindow.opener = null; } catch { /* La referencia controlada sigue siendo válida. */ }
-      pendingWindowRef.current = whatsappWindow;
-    }
     confirmingRef.current = true;
     pendingUrlRef.current = url;
-    pendingNavigationModeRef.current = isMobile ? "mobile" : "desktop";
     setDraft(normalizedDraft);
     setFeedback("");
     setTransactionActive(false);
@@ -140,11 +99,12 @@ export function CheckoutSection({ items, onOpenCart, onRemoveItem, onOrderConfir
   const nameOk = draft.customerName.trim().length >= 2;
   const phoneOk = /^9\d{8}$/.test(draft.phone);
 
-  return <section id="checkout" aria-labelledby="checkout-title" className="checkout-page px-4 pb-20 sm:px-6"><Toast toast={toast} /><div className="mx-auto max-w-5xl">{showSentPanel && sentUrl ? <OrderSentPanel url={sentUrl} onConfirm={confirmOrderSent} onEdit={forgetSentOrder} /> : <>
+  return <section id="checkout" aria-labelledby="checkout-title" className="checkout-page px-4 pb-20 sm:px-6"><Toast toast={toast} /><div className="mx-auto max-w-5xl">
     <CheckoutSteps onOpenCart={onOpenCart} />
     <header className="mt-6 max-w-xl">
       <h1 id="checkout-title" className="font-brush text-[2.6rem] leading-none text-[#F3E9D6] sm:text-6xl">Último paso</h1>
-      <p className="mt-3 text-[.9375rem] leading-relaxed text-[#A39A8E] sm:text-base">Déjanos tu nombre y celular. Abrimos WhatsApp con tu pedido ya escrito y tú solo le das enviar.</p>
+      <p className="mt-3 text-[.9375rem] leading-relaxed text-[#A39A8E] sm:text-base">Déjanos tus datos y la dirección. Abrimos WhatsApp con tu pedido ya escrito y tú solo le das enviar.</p>
+      <StoreStatusBadge className="mt-4" />
     </header>
     <div className="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-10">
       <CheckoutSummary items={items} onOpenCart={onOpenCart} onRemoveItem={removeCheckoutItem} />
@@ -155,39 +115,96 @@ export function CheckoutSection({ items, onOpenCart, onRemoveItem, onOrderConfir
             <FloatingField id="phone" label="Celular" prefix="+51" hint="9 dígitos, empieza en 9" value={draft.phone} maxLength={16} error={errors.phone} valid={phoneOk} inputMode="tel" autoComplete="tel" onChange={(phone) => updateDraft({ phone: normalizePeruvianPhone(phone) })} />
           </div>
         </FieldGroup>
-        <FieldGroup step={2} title="¿Cómo vas a pagar?">
+        <FieldGroup step={2} title="¿A dónde te lo llevamos?">
+          <div className="grid gap-3">
+            <FloatingField id="address" label="Dirección" hint="Calle, número y distrito" value={draft.address} maxLength={160} error={errors.address} valid={draft.address.trim().length >= 5} autoComplete="street-address" onChange={(address) => updateDraft({ address })} />
+            <FloatingField id="reference" label="Referencia (opcional)" hint="Por ejemplo: frente al parque, puerta negra" value={draft.reference} maxLength={120} valid={draft.reference.trim().length > 0} onChange={(reference) => updateDraft({ reference })} />
+            <LocationPicker value={draft.mapsUrl} onChange={(mapsUrl) => updateDraft({ mapsUrl })} />
+          </div>
+        </FieldGroup>
+        <FieldGroup step={3} title="¿Cómo vas a pagar?">
           <PaymentCards name="payment" value={draft.paymentMethod} error={errors.paymentMethod} options={[{ value: "yape", label: "Yape", description: "App Yape" }, { value: "plin", label: "Plin", description: "App de tu banco" }]} onChange={(paymentMethod) => updateDraft({ paymentMethod: paymentMethod as PaymentMethod })} />
         </FieldGroup>
-        <button type="submit" disabled={isConfirming} aria-disabled={isConfirming} aria-label={`Enviar pedido por WhatsApp${total !== null ? `, total S/ ${total}` : ""}`} className="checkout-confirm-button bravos-fill group mt-2">
+        {storeStatus && !storeStatus.open && (
+          <div role="note" className="mt-8 flex gap-3 rounded-2xl border border-[#E0793E]/35 bg-[#2a1810]/80 p-4 text-sm leading-relaxed text-[#f0d2b8] sm:mt-10">
+            <span aria-hidden="true" className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-[#E0793E]/15 text-[#E0793E]">
+              <svg viewBox="0 0 24 24" className="size-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+            </span>
+            <p><strong className="font-semibold text-[#F3E9D6]">Ahora estamos cerrados, pero igual puedes enviar tu pedido.</strong> Lo atendemos apenas abramos ({storeStatus.reopens}) y una persona te escribirá por WhatsApp para confirmarlo.</p>
+          </div>
+        )}
+        <button type="submit" disabled={isConfirming} aria-disabled={isConfirming} aria-label={`Enviar pedido por WhatsApp${total !== null ? `, total S/ ${total}` : ""}`} className={`checkout-confirm-button bravos-fill group ${storeStatus && !storeStatus.open ? "mt-4" : "mt-8 sm:mt-10"}`}>
           <WhatsAppIcon />
-          {/* En celular el texto corto entra en una sola línea junto al total. */}
-          <span className="whitespace-nowrap"><span className="max-sm:hidden">Enviar pedido por WhatsApp</span><span className="sm:hidden">Enviar por WhatsApp</span></span>
+          <span className="whitespace-nowrap">Enviar pedido</span>
           {total !== null && <span className="checkout-confirm-total">S/ {Number.isInteger(total) ? total : total.toFixed(2)}</span>}
         </button>
         <p className="mt-3 flex items-start justify-center gap-2 text-center text-xs leading-relaxed text-[#8c8278]">
           <svg aria-hidden="true" viewBox="0 0 24 24" className="mt-px size-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
-          Aquí no pagas nada. Te confirmamos por WhatsApp y pagas con Yape o Plin.
+          Aquí no pagas nada. Te confirmamos el delivery por WhatsApp y pagas con Yape o Plin.
+        </p>
+        <p className="mt-2 text-center text-xs leading-relaxed text-[#6f665d]">
+          Al enviar aceptas nuestra <Link href="/privacidad" className="underline underline-offset-2 hover:text-[#E0793E]">política de privacidad</Link>.
         </p>
         <div aria-live="polite" className="min-h-5 text-center">{feedback && <p className="text-xs leading-relaxed text-[#fca5a5]">{feedback}</p>}</div>
       </form>
     </div>
-  </>}</div>{isConfirming && <div ref={overlayRef} tabIndex={-1} role="status" aria-live="assertive" aria-label="Enviando tu pedido" className="checkout-transition-overlay"><style>{TRANSACTION_STYLES}</style><div className={`transaction-container${transactionActive ? " transaction-active" : ""}`} dangerouslySetInnerHTML={{ __html: TRANSACTION_MARKUP }} /></div>}</section>;
+  </div>{isConfirming && <div ref={overlayRef} tabIndex={-1} role="status" aria-live="assertive" aria-label="Enviando tu pedido" className="checkout-transition-overlay"><style>{TRANSACTION_STYLES}</style><div className={`transaction-container${transactionActive ? " transaction-active" : ""}`} dangerouslySetInnerHTML={{ __html: TRANSACTION_MARKUP }} /></div>}</section>;
 }
 
-function renderWhatsAppTransition(target: Window) {
-  try {
-    target.document.open();
-    target.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bravos Grill &amp; Smoke</title><style>${TRANSACTION_WINDOW_STYLES}${TRANSACTION_STYLES}</style></head><body><main id="transaction" class="transaction-container" role="status" aria-label="Enviando tu pedido">${TRANSACTION_MARKUP}</main></body></html>`);
-    target.document.close();
-    target.requestAnimationFrame(() => {
-      target.requestAnimationFrame(() => target.document.getElementById("transaction")?.classList.add("transaction-active"));
-    });
-  } catch { /* El overlay de la página original permanece como respaldo visual. */ }
+/* Botón para mandar la ubicación exacta del teléfono como enlace de Google Maps (el repartidor la abre con un toque). */
+function LocationPicker({ value, onChange }: { value: string; onChange: (mapsUrl: string) => void }) {
+  const [state, setState] = useState<"idle" | "loading" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  const locate = () => {
+    if (!("geolocation" in navigator)) { setState("error"); setMessage("Tu navegador no permite compartir la ubicación. Escribe una referencia clara."); return; }
+    setState("loading");
+    setMessage("");
+    navigator.geolocation.getCurrentPosition(
+      (position) => { onChange(buildMapsUrl(position.coords.latitude, position.coords.longitude)); setState("idle"); },
+      (error) => {
+        setState("error");
+        setMessage(error.code === error.PERMISSION_DENIED
+          ? "No diste permiso para usar tu ubicación. Puedes activarlo en tu navegador o escribir una referencia clara."
+          : "No pudimos obtener tu ubicación. Inténtalo de nuevo o escribe una referencia clara.");
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+    );
+  };
+
+  if (value) {
+    return (
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-400/25 bg-emerald-950/40 px-4 py-3">
+        <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-emerald-400/15 text-emerald-300">
+          <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-emerald-100">Ubicación agregada</p>
+          <a href={value} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-300/90 underline underline-offset-2">Ver en Google Maps</a>
+        </div>
+        <button type="button" onClick={() => onChange("")} className="tap min-h-10 rounded-full px-3 text-xs font-semibold text-[#bca58c] hover:text-[#F3E9D6]">Quitar</button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <button type="button" onClick={locate} disabled={state === "loading"}
+        className="tap flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-[#E0793E]/50 bg-[#E0793E]/[.06] px-4 text-sm font-semibold text-[#f0b98c] transition-colors hover:bg-[#E0793E]/[.12] disabled:cursor-wait focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E0793E]">
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="size-[1.1rem]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+        {state === "loading" ? "Buscando tu ubicación…" : "Compartir mi ubicación (Google Maps)"}
+      </button>
+      <p aria-live="polite" className={`mt-1.5 pl-1 text-xs ${state === "error" ? "text-[#fca5a5]" : "text-[#6f665d]"}`}>
+        {state === "error" ? message : "Opcional: así el repartidor llega directo."}
+      </p>
+    </div>
+  );
 }
+
+/** Lo que dura la animación del pago antes de abrir WhatsApp: la tarjeta sube, el POS baja y aparece el check. */
+const TRANSACTION_DURATION_MS = 1900;
 
 const TRANSACTION_MARKUP = `<div class="left-side"><div class="card"><div class="card-line"></div><div class="buttons"></div></div><div class="post"><div class="post-line"></div><div class="screen"><div class="confirmation">&#10003;</div></div><div class="numbers"></div><div class="numbers-line2"></div></div></div><div class="right-side"><div class="new"><strong>Enviando tu pedido...</strong><small>Abriendo WhatsApp...</small></div><svg viewBox="0 0 451.846 451.847" aria-hidden="true" class="arrow"><path fill="currentColor" d="M345.441 248.292L151.154 442.573c-12.359 12.365-32.397 12.365-44.75 0-12.354-12.354-12.354-32.391 0-44.744L278.318 225.92 106.409 54.017c-12.354-12.359-12.354-32.394 0-44.748 12.354-12.359 32.391-12.359 44.75 0l194.287 194.284c6.177 6.18 9.262 14.271 9.262 22.366 0 8.099-3.091 16.196-9.267 22.373z"></path></svg></div>`;
-
-const TRANSACTION_WINDOW_STYLES = `*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#111;padding:12px;font-family:"Lexend Deca",Arial,sans-serif}`;
 
 const TRANSACTION_STYLES = `
 .transaction-container{background-color:#ffffff;display:flex;width:min(calc(100vw - 24px),460px);height:120px;position:relative;border-radius:6px;transition:.3s ease-in-out}
@@ -216,19 +233,6 @@ const TRANSACTION_STYLES = `
 @media(max-width:390px){.new{font-size:clamp(17px,5vw,20px);margin-left:14px}.new small{font-size:10px}.arrow{margin-right:12px}}
 @media(prefers-reduced-motion:reduce){.transaction-container{transition-duration:.01ms}.transaction-container.transaction-active .card{animation-duration:.35s!important}.transaction-container.transaction-active .post{animation-duration:.35s!important}.transaction-container.transaction-active .confirmation{animation-duration:.2s!important;animation-delay:.35s!important}}
 `;
-
-function OrderSentPanel({ url, onConfirm, onEdit }: { url: string; onConfirm: () => void; onEdit: () => void }) {
-  return <div className="mx-auto max-w-xl rounded-[1.75rem] border border-white/[.07] bg-[#1b130e] p-6 text-center sm:p-10">
-    <span aria-hidden="true" className="mx-auto grid size-14 place-items-center rounded-full bg-[#25D366]/15 text-[#4ade80]"><WhatsAppIcon className="size-7" /></span>
-    <h1 id="checkout-title" className="mt-5 font-brush text-4xl leading-none text-[#F3E9D6] sm:text-5xl">¿Ya nos llegó tu pedido?</h1>
-    <p className="mx-auto mt-4 max-w-md text-[.9375rem] leading-relaxed text-[#bca58c]">Si WhatsApp se abrió y le diste enviar, listo: te respondemos por ahí. Si no se abrió o no lo enviaste, tu pedido sigue guardado.</p>
-    <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center">
-      <button type="button" onClick={onConfirm} className="bravos-button tap">Ya lo envié</button>
-      <a href={url} target="_blank" rel="noopener noreferrer" className="bravos-button bravos-button--ghost tap">Abrir WhatsApp otra vez</a>
-    </div>
-    <button type="button" onClick={onEdit} className="tap mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-[#E0793E] underline-offset-4 hover:underline">Cambiar algo del pedido</button>
-  </div>;
-}
 
 /* Pasos arriba del formulario: el carrito ya está listo, ahora tus datos y luego WhatsApp. */
 function CheckoutSteps({ onOpenCart }: { onOpenCart: () => void }) {

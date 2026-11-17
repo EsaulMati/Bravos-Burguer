@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export function BrandStory() {
   return (
@@ -25,9 +26,9 @@ export function BrandStory() {
             Cuando el hambre ruge, el León pide carne
           </h2>
           <p className="mt-6 text-base leading-7 text-[#e6dac6] sm:text-lg sm:leading-8">
-            Bravos es una cocina de Arequipa que trabaja solo para delivery. Sellamos la carne en plancha bien caliente, le ponemos queso fundido y salsa de la casa, y te la mandamos a la puerta. Doble carne si el hambre ruge, combos si viene la manchita.
+            Bravos es una cocina de Arequipa que trabaja solo para delivery. Sellamos la carne en plancha bien caliente, le ponemos queso fundido y salsa de la casa, y te la mandamos a la puerta. Siempre con papas, y doble carne si el hambre ruge.
           </p>
-          <a href="#armar-orden" className="bravos-button tap mt-8">Armar mi pedido</a>
+          <Link href="/menu" className="bravos-button tap mt-8">Ver el menú</Link>
         </div>
       </div>
     </section>

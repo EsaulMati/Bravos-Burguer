@@ -9,6 +9,7 @@ import {
   calculateCartItemSubtotal,
   calculateCartTotal,
   CART_QUANTITY_LIMIT,
+  formatDrinkCounts,
   formatSauceSelection,
   isCatalogCartItem,
   getCartItemImage,
@@ -98,12 +99,12 @@ export function CartDrawer({
     };
   }, [isOpen, onClose]);
 
-  // En la portada baja a la sección; en otras páginas (como /menu) lleva a la portada en esa sección.
+  // En el menú baja a la sección; desde otras páginas lleva al menú en esa sección.
   const goTo = (id: string) => {
     onClose();
     const target = document.getElementById(id);
     if (!target) {
-      router.push(`/#${id}`);
+      router.push(`/menu#${id}`);
       return;
     }
     window.requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
@@ -179,11 +180,10 @@ export function CartDrawer({
                   <Image src="/brand/bravos-escudo.png" alt="" width={1043} height={937} sizes="120px" className="h-24 w-auto opacity-25 grayscale" />
                   <h3 className="mt-6 font-brush text-3xl leading-none text-[#F3E9D6]">La plancha está lista</h3>
                   <p className="mt-3 max-w-[16rem] text-sm leading-relaxed text-[#A39A8E]">
-                    Arma tu burger o elige un combo para la manchita y aparecerá aquí.
+                    Elige tu burger en el menú y aparecerá aquí.
                   </p>
                   <div className="mt-6 flex flex-wrap justify-center gap-2.5">
-                    <button type="button" onClick={() => goTo("armar-orden")} className="tap bravos-fill min-h-11 rounded-full bg-[#B35629] px-5 text-sm font-semibold text-white">Arma tu pedido</button>
-                    <button type="button" onClick={() => goTo("combos")} className="tap bravos-fill min-h-11 rounded-full border border-white/20 px-5 text-sm font-semibold text-[#F3E9D6]">Para la manchita</button>
+                    <button type="button" onClick={() => goTo("hamburguesas")} className="tap bravos-fill min-h-11 rounded-full bg-[#B35629] px-5 text-sm font-semibold text-white">Ver el menú</button>
                   </div>
                 </div>
               ) : (
@@ -250,9 +250,10 @@ function CartLine({ item, onUpdate, onRemove }: CartLineProps) {
   const subtotal = calculateCartItemSubtotal(item);
 
   if (isCatalogCartItem(item)) {
-    const details = [item.sauce && `Salsa: ${formatSauceSelection(item.sauce)}`, item.drink && `Gaseosa: ${item.drink}`].filter(Boolean).join(" · ");
+    const drinks = formatDrinkCounts(item.drinkCounts);
+    const details = [item.sauce && `Salsa: ${formatSauceSelection(item.sauce)}`, item.drink && `Gaseosa: ${item.drink}`, drinks && `Gaseosas: ${drinks}`].filter(Boolean).join(" · ");
     return (
-      <LineLayout thumbnail={thumbnail} name={item.name} details={details} onRemove={onRemove}
+      <LineLayout thumbnail={thumbnail} name={item.name} details={details} notes={item.notes} onRemove={onRemove}
         footer={<><MiniStepper label={item.name} value={item.quantity} onChange={(quantity) => onUpdate({ quantity })} /><Price value={subtotal} /></>} />
     );
   }
@@ -262,7 +263,8 @@ function CartLine({ item, onUpdate, onRemove }: CartLineProps) {
   const drinkAddon = ADDONS_DATA.find((addon) => addon.id === "drink");
   if (!burger) return null;
   const details = [
-    item.friesEnabled ? `Con papas${item.sauce ? ` (${formatSauceSelection(item.sauce)})` : ""}` : "Sin papas",
+    `Con papas${item.sauce ? ` (${formatSauceSelection(item.sauce)})` : ""}`,
+    item.friesEnabled ? "papas extra" : null,
     item.drinkEnabled ? `con ${item.drink ?? "gaseosa"}` : null,
   ].filter(Boolean).join(" · ");
 
@@ -278,7 +280,7 @@ function CartLine({ item, onUpdate, onRemove }: CartLineProps) {
       extras={hasExtras && (
         <div className="mt-2.5 space-y-1.5 border-t border-white/[.06] pt-2.5">
           <ExtraRow name={burger.name} value={item.burgerQuantity} onChange={(burgerQuantity) => onUpdate({ burgerQuantity })} />
-          {item.friesEnabled && friesAddon && <ExtraRow name="Papas" value={item.friesQuantity} onChange={(friesQuantity) => onUpdate({ friesQuantity })} />}
+          {item.friesEnabled && friesAddon && <ExtraRow name="Papas extra"value={item.friesQuantity} onChange={(friesQuantity) => onUpdate({ friesQuantity })} />}
           {item.drinkEnabled && drinkAddon && <ExtraRow name={item.drink ?? "Gaseosa"} value={item.drinkQuantity} onChange={(drinkQuantity) => onUpdate({ drinkQuantity })} />}
         </div>
       )}

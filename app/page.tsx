@@ -8,7 +8,7 @@ import { BRAVOS_WHATSAPP_NUMBER } from "@/src/data/contact";
 import { OPEN_GRAPH_BASE, SHARE_IMAGE } from "@/src/data/seo";
 
 const title = "Hamburguesas con delivery en Arequipa | Bravos Grill & Smoke";
-const description = "Hamburguesas a la plancha con delivery en Arequipa desde S/ 20. Arma tu pedido, envíalo por WhatsApp y paga con Yape o Plin. Al León hay que darle carne.";
+const description = "Hamburguesas a la plancha con delivery en Arequipa desde S/ 20. Elige tu burger, envía el pedido por WhatsApp y paga con Yape o Plin. Al León hay que darle carne.";
 
 export const metadata: Metadata = {
   title: { absolute: title },
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title, description, images: [SHARE_IMAGE.url] },
 };
 
-// Ficha del negocio para Google. Solo datos confirmados; horario y zonas se agregan cuando el dueño los pase.
+// Ficha del negocio para Google. Solo datos confirmados por el dueño (el horario coincide con src/lib/schedule.ts).
 const restaurantJsonLd = {
   "@context": "https://schema.org",
   "@type": "Restaurant",
@@ -33,6 +33,11 @@ const restaurantJsonLd = {
   hasMenu: "https://bravossburguer.pro/menu",
   acceptsReservations: false,
   paymentAccepted: "Yape, Plin",
+  priceRange: "S/ 20 - S/ 56",
+  openingHoursSpecification: [
+    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Tuesday", "Wednesday"], opens: "16:30", closes: "23:30" },
+    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Thursday", "Friday", "Saturday", "Sunday"], opens: "16:30", closes: "01:00" },
+  ],
   currenciesAccepted: "PEN",
   sameAs: ["https://www.instagram.com/bravosgrillsmoke"],
 };

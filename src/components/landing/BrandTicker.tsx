@@ -4,7 +4,7 @@ const PHRASES = [
   "El León y La Gordita, a la plancha",
   "Pides por WhatsApp",
   "Pagas con Yape o Plin",
-  "Combos para la manchita",
+  "Siempre con papas",
   "Al León hay que darle carne",
 ];
 

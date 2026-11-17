@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Anton, Barlow_Condensed, Knewave, Rubik } from "next/font/google";
 import { MotionProvider } from "@/src/components/MotionProvider";
+import { PrivacyNotice } from "@/src/components/legal/PrivacyNotice";
 import { OPEN_GRAPH_BASE, SHARE_IMAGE } from "@/src/data/seo";
 import "./globals.css";
 
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://bravossburguer.pro"),
   title: { default: "Bravos Grill & Smoke", template: "%s | Bravos Grill & Smoke" },
   description:
-    "Hamburguesas a la plancha con delivery en Arequipa. Arma tu pedido, envíalo por WhatsApp y paga con Yape o Plin. Al León hay que darle carne.",
+    "Hamburguesas a la plancha con delivery en Arequipa. Elige tu burger, envía el pedido por WhatsApp y paga con Yape o Plin. Al León hay que darle carne.",
   icons: {
     icon: [{ url: "/brand/bravos-icono-64.png", type: "image/png" }],
     shortcut: ["/brand/bravos-icono-64.png"],
@@ -46,6 +47,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#16110E] text-[#F3E9D6] font-sans selection:bg-[#B35629] selection:text-white">
         <MotionProvider>{children}</MotionProvider>
+        <PrivacyNotice />
       </body>
     </html>
   );

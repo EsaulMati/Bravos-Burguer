@@ -1,11 +1,3 @@
-export type ProductCategory = "all" | "burgers" | "sides" | "drinks";
-
-export interface CategoryOption {
-  id: ProductCategory;
-  label: string;
-  iconName?: string;
-}
-
 export interface ProductItem {
   id: string;
   name: string;
@@ -14,6 +6,10 @@ export interface ProductItem {
   description: string;
   image: string;
   cutoutImage?: string; // Ruta a imagen PNG/WebP transparente (pendiente de proporcionar)
+  /** Foto de la burger con sus papas, para el menú. */
+  menuImage?: string;
+  /** Frase que acompaña a la burger en el menú y en la portada. */
+  tagline?: string;
   badge?: string;
   featured?: boolean;
   highlightIngredients?: string[];
@@ -42,11 +38,14 @@ export interface OrderDraft {
 
 export type SauceName = "Ranchera" | "Tártara" | "Mayo Golf";
 export type SauceSelection = SauceName[] | "Ninguna" | null;
-export type DrinkSelection = "Coca-Cola" | "Inca Kola" | null;
+export type DrinkName = "Coca-Cola" | "Inca Kola";
+export type DrinkSelection = DrinkName | null;
+/** Reparto de gaseosas de un combo, por ejemplo { "Coca-Cola": 1, "Inca Kola": 1 }. */
+export type DrinkCounts = Partial<Record<DrinkName, number>>;
 
 export interface BuilderCartItem extends OrderDraft {
   id: string;
-  /** Snapshot de precios vigente cuando se agregó la orden. */
+  /** Precios del catálogo; se recalculan cada vez que se lee el carrito. */
   unitPrice: number;
   friesUnitPrice: number;
   drinkUnitPrice: number;
@@ -61,6 +60,10 @@ export interface CatalogCartItem {
   quantity: number;
   sauce: SauceSelection;
   drink: DrinkSelection;
+  /** Solo en combos: indicaciones que el cliente escribió en el panel. */
+  notes?: string;
+  /** Solo en combos con gaseosas: cuántas de cada una lleva cada combo. */
+  drinkCounts?: DrinkCounts;
 }
 
 export type CartItem = BuilderCartItem | CatalogCartItem;
@@ -74,6 +77,12 @@ export type PaymentMethod = "yape" | "plin";
 export interface CheckoutDraft {
   customerName: string;
   phone: string;
+  /** Dirección de entrega tal como la escribe el cliente. */
+  address: string;
+  /** Referencia opcional: "frente al parque, puerta negra". */
+  reference: string;
+  /** Enlace de Google Maps con la ubicación del teléfono, si el cliente la compartió. */
+  mapsUrl: string;
   paymentMethod: PaymentMethod | "";
 }
 

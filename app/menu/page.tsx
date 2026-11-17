@@ -3,10 +3,11 @@ import { FooterSimple } from "@/src/components/landing/FooterSimple";
 import { Navbar } from "@/src/components/landing/Navbar";
 import { MenuCatalogExperience } from "@/src/components/menu/MenuCatalogExperience";
 import { OPEN_GRAPH_BASE, SHARE_IMAGE } from "@/src/data/seo";
+import { StoreStatusBadge } from "@/src/components/StoreStatusBadge";
 
 export const metadata: Metadata = {
   title: { absolute: "Menú de hamburguesas y precios en Arequipa | Bravos" },
-  description: "La Gordita desde S/ 20, El León con doble carne desde S/ 25, combos Ya Pagaron para la manchita, papas y gaseosas. Arma tu pedido y envíalo por WhatsApp.",
+  description: "La Gordita a S/ 20 y El León con doble carne a S/ 25, siempre con papas. Súmale gaseosa o papas extra y envía tu pedido por WhatsApp.",
   alternates: { canonical: "/menu" },
   openGraph: { ...OPEN_GRAPH_BASE, url: "/menu", title: "Menú de hamburguesas y precios en Arequipa | Bravos" },
   twitter: { card: "summary_large_image", images: [SHARE_IMAGE.url] },
@@ -23,8 +24,9 @@ export default function MenuPage() {
               El menú
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-[#d9cdb9] sm:text-lg">
-              Hamburguesas a la plancha, combos para compartir y sus yapas. Precios en soles. Pides por WhatsApp y pagas con Yape o Plin.
+              Dos hamburguesas a la plancha, siempre con papas. Precios en soles. Pides por WhatsApp y pagas con Yape o Plin.
             </p>
+            <StoreStatusBadge className="mt-5" />
           </div>
         </header>
 

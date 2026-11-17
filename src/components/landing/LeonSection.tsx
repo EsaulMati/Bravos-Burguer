@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 
@@ -139,7 +140,7 @@ export function LeonSection() {
           <p className="mt-7 max-w-md text-base leading-relaxed text-[#6B5D52] sm:text-lg">
             Es el que pides cuando el hambre ruge: el de la casa, el que le pone nombre a la frase.
           </p>
-          <a href="#armar-orden" className="bravos-button tap mt-6">Quiero El León</a>
+          <Link href="/menu#brava-doble" className="bravos-button tap mt-6">Quiero El León</Link>
         </div>
       </div>
     </section>

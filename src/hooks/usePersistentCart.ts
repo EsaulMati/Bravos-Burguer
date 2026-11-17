@@ -71,16 +71,7 @@ export function usePersistentCart() {
     }));
   }, []);
 
-  const clearCart = useCallback(() => {
-    const updatedAt = Date.now();
-    updatedAtRef.current = updatedAt;
-    try {
-      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items: [], updatedAt }));
-    } catch { /* El estado en memoria también se vacía. */ }
-    setCart({ items: [] });
-  }, []);
-
-  return { cart, isHydrated, addItem, updateItem, removeItem, clearCart };
+  return { cart, isHydrated, addItem, updateItem, removeItem };
 }
 
 const CART_EXPIRATION_MS = 2 * 60 * 60 * 1000;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { BURGERS_DATA } from "@/src/data/featured-products";
-import { calculateCartItemSubtotal, calculateCartTotal, formatSauceSelection, getCartItemCount, getCartItemImage, isCatalogCartItem } from "@/src/lib/cart";
+import { calculateCartItemSubtotal, calculateCartTotal, formatDrinkCounts, formatSauceSelection, getCartItemCount, getCartItemImage, isCatalogCartItem } from "@/src/lib/cart";
 import type { CartItem } from "@/src/types/landing";
 
 interface CheckoutSummaryProps {
@@ -40,13 +40,15 @@ export function CheckoutSummary({ items, onOpenCart, onRemoveItem }: CheckoutSum
         {items.map((item) => {
           const subtotal = calculateCartItemSubtotal(item);
           if (isCatalogCartItem(item)) {
-            const details = [item.sauce && `Salsa: ${formatSauceSelection(item.sauce)}`, item.drink && item.drink].filter(Boolean).join(" · ");
-            return <SummaryLine key={item.id} image={getCartItemImage(item)} title={`${item.quantity} × ${item.name}`} details={details} subtotal={subtotal} onRemove={() => onRemoveItem(item)} removeLabel={item.name} />;
+            const drinks = formatDrinkCounts(item.drinkCounts);
+            const details = [item.sauce && `Salsa: ${formatSauceSelection(item.sauce)}`, item.drink && item.drink, drinks && `Gaseosas: ${drinks}`].filter(Boolean).join(" · ");
+            return <SummaryLine key={item.id} image={getCartItemImage(item)} title={`${item.quantity} × ${item.name}`} details={details} notes={item.notes} subtotal={subtotal} onRemove={() => onRemoveItem(item)} removeLabel={item.name} />;
           }
           const burger = BURGERS_DATA.find((product) => product.id === item.burgerId);
           if (!burger) return null;
           const details = [
-            item.friesEnabled ? `${item.friesQuantity} papas${item.sauce ? ` (${formatSauceSelection(item.sauce)})` : ""}` : null,
+            `Con papas${item.sauce ? ` (${formatSauceSelection(item.sauce)})` : ""}`,
+            item.friesEnabled ? `${item.friesQuantity} papas extra` : null,
             item.drinkEnabled ? `${item.drinkQuantity} ${item.drink ?? "gaseosa"}` : null,
           ].filter(Boolean).join(" · ");
           return <SummaryLine key={item.id} image={getCartItemImage(item)} title={`${item.burgerQuantity} × ${burger.name}`} details={details} notes={item.notes} subtotal={subtotal} onRemove={() => onRemoveItem(item)} removeLabel={burger.name} />;

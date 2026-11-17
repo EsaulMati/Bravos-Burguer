@@ -5,8 +5,18 @@ export const CHECKOUT_STORAGE_KEY = "bravos-checkout-v1";
 export const INITIAL_CHECKOUT_DRAFT: CheckoutDraft = {
   customerName: "",
   phone: "",
+  address: "",
+  reference: "",
+  mapsUrl: "",
   paymentMethod: "",
 };
+
+/** Solo enlaces que arma el propio sitio: https://www.google.com/maps?q=lat,lng */
+const MAPS_URL = /^https:\/\/www\.google\.com\/maps\?q=-?\d{1,2}\.\d+,-?\d{1,3}\.\d+$/;
+
+export function buildMapsUrl(latitude: number, longitude: number): string {
+  return `https://www.google.com/maps?q=${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+}
 
 export function normalizeCheckout(value: unknown): CheckoutDraft {
   if (!isRecord(value)) return INITIAL_CHECKOUT_DRAFT;
@@ -19,6 +29,9 @@ export function normalizeCheckout(value: unknown): CheckoutDraft {
   return {
     customerName: cleanText(value.customerName, 80),
     phone: normalizePeruvianPhone(value.phone),
+    address: cleanText(value.address, 160),
+    reference: cleanText(value.reference, 120),
+    mapsUrl: typeof value.mapsUrl === "string" && MAPS_URL.test(value.mapsUrl) ? value.mapsUrl : "",
     paymentMethod,
   };
 }
@@ -46,6 +59,8 @@ export function validateCheckout(draft: CheckoutDraft): CheckoutErrors {
   if (!/^9\d{8}$/.test(normalizePeruvianPhone(draft.phone))) {
     errors.phone = "Ingresa un celular peruano válido de 9 dígitos que empiece en 9.";
   }
+
+  if (draft.address.trim().length < 5) errors.address = "Escribe tu dirección para el delivery.";
 
   if (!draft.paymentMethod) errors.paymentMethod = "Selecciona un método de pago.";
 

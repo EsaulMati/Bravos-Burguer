@@ -6,9 +6,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 const links = [
+  { href: "/", label: "Inicio" },
   { href: "/menu", label: "Menú" },
-  { href: "/#combos", label: "Para la manchita" },
-  { href: "/#armar-orden", label: "Arma tu pedido" },
 ];
 
 export function Navbar() {
@@ -47,10 +46,10 @@ export function Navbar() {
           <Image src="/brand/bravos-escudo.png" alt="" width={1043} height={937} priority sizes="(min-width: 1024px) 80px, 68px" className="bravos-brand-crest" />
         </Link>
         <nav aria-label="Navegación principal" className="bravos-desktop-nav hidden items-center lg:flex">
-          {links.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
+          {links.map((link) => <Link key={link.href} href={link.href} onClick={link.href === "/" ? goHome : undefined} aria-current={pathname === link.href ? "page" : undefined}>{link.label}</Link>)}
         </nav>
         <div className="flex shrink-0 items-center gap-2">
-          <Link href="/#armar-orden" onClick={() => setMenuOpen(false)} aria-label="Pedir ahora" className="bravos-order-link tap">
+          <Link href="/menu#hamburguesas" onClick={() => setMenuOpen(false)} aria-label="Pedir ahora" className="bravos-order-link tap">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="bravos-order-flame"><path d="M12 2c1 3.5-1.6 5.2-1.6 7.8 0 1.4 1 2.4 2.2 2.4 1.5 0 2.2-1.2 2-2.9 2.3 1.6 3.9 4.2 3.9 6.9A6.5 6.5 0 0 1 12 22.5a6.5 6.5 0 0 1-6.5-6.3C5.5 10 12 7.6 12 2Z" /></svg>
             <span>Pedir<span className="max-sm:hidden"> ahora</span></span>
           </Link>
@@ -64,7 +63,7 @@ export function Navbar() {
         </div>
       </div>
       {menuOpen && <nav id="mobile-navigation" aria-label="Navegación móvil" className="bravos-mobile-nav grid lg:hidden">
-        {links.map((link) => <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</Link>)}
+        {links.map((link) => <Link key={link.href} href={link.href} onClick={link.href === "/" ? goHome : () => setMenuOpen(false)} aria-current={pathname === link.href ? "page" : undefined}>{link.label}</Link>)}
       </nav>}
     </header>
   );
